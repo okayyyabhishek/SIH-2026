@@ -71,6 +71,10 @@ desktop.ini
 .agent/
 .agents/
 .gemini/
+.prd/
+.techstack/
+prd/
+techstack/
 scratch/
 apps/api/scratch/
 audit_routes.mjs
