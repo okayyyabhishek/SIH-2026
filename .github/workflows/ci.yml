@@ -26,6 +26,18 @@ jobs:
   backend-quality:
     name: Backend Lint, Type Check & Test
     runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:latest
+        options: >-
+          --health-cmd mongosh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+
     defaults:
       run:
         working-directory: apps/api
