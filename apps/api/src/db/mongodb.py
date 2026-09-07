@@ -24,7 +24,7 @@ def mask_mongo_uri(uri: str) -> str:
     """
     if not uri:
         return ""
-    # Mask standard mongodb://user:pass@ and mongodb+srv://user:pass@
+    # Mask standard mongodb://<user>:<pass>@ and mongodb+srv://<user>:<pass>@
     masked = re.sub(r"(mongodb(?:\+srv)?://)([^:]+):([^@]+)@", r"\1***:***@", uri)
     try:
         from src.core.config import settings

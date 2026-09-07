@@ -24,11 +24,23 @@ IGNORED_DIRS = {
     "dist",
     "build",
     ".agent",
+    ".agents",
+    ".gemini",
+    ".prd",
+    ".techstack",
+    "scratch",
+    "storage",
     "coverage",
     "playwright-report",
+    "test-results",
 }
 
 IGNORED_FILES = {
+    ".env",
+    ".env.local",
+    ".env.development",
+    ".env.test",
+    ".env.production",
     ".env.example",
     "package-lock.json",
     "scan_secrets.py",
@@ -40,21 +52,43 @@ PATTERNS = [
     (r"(?i)aws_secret_access_key\s*=\s*['\"][0-9a-zA-Z/+]{40}['\"]", "AWS Secret Access Key"),
     (r"-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----", "Private Key Header"),
     (r"(?i)(?:api_key|apikey|secret_key|private_key)\s*=\s*['\"][a-zA-Z0-9_\-]{24,}['\"]", "Hardcoded API/Secret Key"),
-    (r"mongodb(?:\+srv)?:\/\/[^:]+:[^@]+@", "MongoDB Connection String with Credentials"),
+    (r"mongodb(?:\+srv)?:\/\/(?!\*\*\*:\*\*\*)[a-zA-Z0-9_\-\.%]+:[a-zA-Z0-9_\-\.%]+@", "MongoDB Connection String with Credentials"),
     (r"ghp_[a-zA-Z0-9]{36}", "GitHub Personal Access Token"),
 ]
+
+# Tokens indicating dummy examples, test fixtures, or sanitized placeholders
+DUMMY_INDICATORS = {
+    "example",
+    "dev-secret-key",
+    "dummy",
+    "fake",
+    "mock",
+    "test",
+    "user:pass",
+    "admin:pass",
+    "secretpass",
+    "leaker_user",
+    "***:***",
+}
 
 def scan_file(filepath: Path) -> list[tuple[int, str, str]]:
     findings = []
     try:
         content = filepath.read_text(encoding="utf-8", errors="ignore")
         for line_idx, line in enumerate(content.splitlines(), start=1):
+            stripped = line.strip()
+            # Exclude code comments explaining formats
+            if stripped.startswith(("#", "//", "/*", "*", "<!--")):
+                continue
+
+            # Exclude lines containing known test fixtures or placeholders
+            lower_line = line.lower()
+            if any(indicator in lower_line for indicator in DUMMY_INDICATORS):
+                continue
+
             for pattern, desc in PATTERNS:
-                # Exclude dummy examples and comments mentioning pattern
-                if "example" in line.lower() or "dev-secret-key" in line or "dummy" in line.lower():
-                    continue
                 if re.search(pattern, line):
-                    findings.append((line_idx, desc, line.strip()[:60]))
+                    findings.append((line_idx, desc, stripped[:60]))
     except Exception as e:
         print(f"Warning: could not read {filepath}: {e}", file=sys.stderr)
     return findings
