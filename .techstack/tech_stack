@@ -1,0 +1,1151 @@
+SENTINEL NER — PRODUCTION TECH STACK & ARCHITECTURE
+
+Deployment: AWS
+Primary database: MongoDB Atlas
+Application model: Modular production application with asynchronous processing; avoid premature microservices.
+
+1. Architecture Overview
+
+                         USERS / FIELD STAFF
+                                  |
+                           HTTPS / Internet
+                                  |
+                    +-------------v-------------+
+                    | AWS Edge / CDN / HTTPS    |
+                    +-------------+-------------+
+                                  |
+                    +-------------v-------------+
+                    | Next.js / React Frontend  |
+                    | TypeScript + PWA          |
+                    +-------------+-------------+
+                                  |
+                         REST / WebSocket
+                                  |
+                    +-------------v-------------+
+                    | FastAPI Application        |
+                    | Modular Domain Services    |
+                    +-------------+-------------+
+                                  |
+          +-----------------------+------------------------+
+          |                       |                        |
+   +------v------+          +-----v------+          +------v------+
+   | MongoDB     |          | Redis      |          | AWS S3      |
+   | Atlas       |          | Cache/jobs |          | Large data  |
+   +-------------+          +------------+          +-------------+
+          |
+   +------v---------------------------------------------------+
+   | Async Processing / Celery / Scientific & Geospatial Work |
+   +-----------------------------------------------------------+
+          |
+   +------+------+-------+---------+---------+----------------+
+   |             |       |         |         |                |
+ GSI/IMD     Sentinel  InSAR     IoT     Citizen       Other APIs
+ /ISRO       products   MintPy    MQTT     reports
+
+                             |
+                             v
+                      Decision / Action
+                             |
+                  +----------+----------+
+                  |                     |
+           Human Authorization     Field Operations
+                  |                     |
+          CAP / alert adapters    Offline PWA / QR sync
+
+                             |
+                             v
+                       Warning Ledger
+
+2. Frontend
+
+Core
+
+Next.js
+
+React
+
+TypeScript
+
+UI
+
+Tailwind CSS
+
+shadcn/ui
+
+custom design tokens for Sentinel NER
+
+Data fetching/state
+
+TanStack Query for server state
+
+Zustand only for genuinely local client state
+
+Mapping
+
+MapLibre GL JS
+
+GeoJSON/vector sources
+
+vector tiles where required
+
+Charts
+
+Apache ECharts
+
+Offline
+
+Service Worker
+
+Workbox
+
+IndexedDB
+
+cached application shell
+
+cached risk snapshot
+
+queued field submissions
+
+Community reporting UX
+
+Public/low-friction hazard reporting route.
+
+Browser geolocation with explicit permission handling.
+
+Progressive photo/video upload.
+
+Upload progress and retry.
+
+Report status page.
+
+Public nearby/route hazard view with verification state.
+
+Clear distinction between reported, probable, verified, rejected, and resolved.
+
+3. UI/UX Design System
+
+Visual language:
+
+dark operational base;
+
+controlled liquid-glass surfaces;
+
+high contrast;
+
+restrained blur/transparency;
+
+clear risk hierarchy;
+
+texture/icon/label as secondary semantic channels;
+
+no red/green-only meaning;
+
+no heavy decoration that competes with emergency information.
+
+Primary information architecture:
+
+Action Queue → Evidence → Map → Consequence → Authorization → Outcome
+
+The consumer-weather reference may inform visual styling, but Sentinel NER must not inherit weather-centric information architecture.
+
+4. Backend
+
+Framework
+
+FastAPI
+
+Responsibilities:
+
+REST APIs
+
+WebSocket/event updates where needed
+
+authentication integration
+
+authorization enforcement
+
+validation
+
+orchestration
+
+audit events
+
+geospatial query services
+
+ML service orchestration
+
+Validation
+
+Pydantic
+
+explicit DTO/request/response schemas
+
+Error handling
+
+Use structured errors with:
+
+stable error code;
+
+human-safe message;
+
+trace/correlation ID;
+
+appropriate HTTP status.
+
+4A. Community Intelligence APIs
+
+Recommended resource surface:
+
+POST   /community-reports
+GET    /community-reports/{id}
+GET    /community-reports/nearby
+GET    /community-reports/route
+POST   /community-reports/{id}/media
+POST   /community-reports/{id}/verify
+POST   /community-reports/{id}/moderate
+GET    /community-event-clusters/{id}
+
+Authorization must differ by endpoint. Public users may create reports and view approved public information; only privileged roles may verify, moderate, escalate, or link a report to an operational event.
+
+5. MongoDB Atlas
+
+MongoDB is the operational system of record.
+
+Why
+
+The core operational entities are document-oriented and evolve by workflow:
+
+risk events;
+
+reports;
+
+actions;
+
+alerts;
+
+sensor observations;
+
+audit records;
+
+playbooks;
+
+model runs.
+
+Geospatial
+
+Use GeoJSON and 2dsphere indexes for operational spatial queries.
+
+Example index concept:
+
+db.slopeUnits.createIndex({ geometry: "2dsphere" })
+
+Collections
+
+users
+
+organizations
+
+districts
+
+slopeUnits
+
+roads
+
+roadChainages
+
+villages
+
+assets
+
+landslideEvents
+
+riskPredictions
+
+riskDeltas
+
+rainfallObservations
+
+soilConditions
+
+satelliteChanges
+
+insarObservations
+
+sensors
+
+sensorObservations
+
+citizenReports
+
+communityEventClusters
+
+communityModerationEvents
+
+alerts
+
+alertRecipients
+
+actions
+
+playbooks
+
+acknowledgements
+
+warningLedger
+
+modelRuns
+
+modelVersions
+
+systemEvents
+
+MongoDB rules
+
+Design indexes from actual query patterns.
+
+Bound all large reads.
+
+Paginate lists.
+
+Avoid unbounded $in or regex patterns from user input.
+
+Validate GeoJSON.
+
+Use transactions where multi-document consistency is material and supported by the chosen deployment topology.
+
+Preserve event/audit immutability.
+
+6. AWS S3
+
+Use S3 for large objects, not MongoDB.
+
+Store:
+
+Sentinel imagery;
+
+DEM/raster assets;
+
+InSAR products;
+
+change-detection outputs;
+
+evidence photos;
+
+model artifacts;
+
+model reports;
+
+generated documents.
+
+MongoDB stores metadata and object references.
+
+Example:
+
+{
+  "source": "sentinel-1",
+  "acquisitionDate": "2026-08-29",
+  "objectKey": "sentinel-1/aizawl/2026/08/29/product.tif"
+}
+
+S3 requirements:
+
+block public access by default;
+
+least-privilege IAM;
+
+encryption at rest;
+
+lifecycle/retention policies where needed;
+
+versioning for critical objects;
+
+access logging/monitoring where appropriate.
+
+7. Redis
+
+Use Redis for:
+
+cache;
+
+short-lived state;
+
+rate limiting;
+
+latest sensor state;
+
+active action queue acceleration;
+
+Celery broker/backend where chosen.
+
+Redis is not the system of record.
+
+8. Celery / Async Processing
+
+Heavy jobs must not run inside request-response paths.
+
+Candidate jobs:
+
+satellite ingestion;
+
+raster preprocessing;
+
+change detection;
+
+InSAR processing;
+
+risk recalculation;
+
+scenario computation;
+
+report generation;
+
+notification preparation.
+
+Every job should have:
+
+unique ID;
+
+status;
+
+timestamps;
+
+retry policy;
+
+bounded retry count;
+
+failure reason;
+
+correlation ID.
+
+9. Geospatial Stack
+
+GDAL
+
+GeoPandas
+
+Rasterio
+
+Shapely
+
+PyProj
+
+Xarray
+
+PySTAC / STAC-compatible tooling
+
+Responsibilities:
+
+vector processing;
+
+raster processing;
+
+coordinate transforms;
+
+geometry validation;
+
+spatial intersections;
+
+buffering/nearest operations;
+
+satellite product metadata.
+
+Do not force all scientific raster operations through MongoDB.
+
+10. Remote Sensing / InSAR
+
+Sentinel-1
+
+Potential pipeline:
+
+Sentinel-1
+   -> preprocessing
+   -> InSAR
+   -> displacement products
+   -> velocity/acceleration signals
+   -> slope linkage
+   -> Creep Watch
+
+Tooling
+
+MintPy where applicable
+
+ESA-compatible preprocessing tooling as required
+
+GDAL/Rasterio for product management
+
+All upstream assumptions and quality flags must be preserved.
+
+11. ML Stack
+
+Baseline
+
+XGBoost
+
+scikit-learn-compatible evaluation utilities where required
+
+Deep learning
+
+PyTorch
+
+Geospatial deep learning
+
+TorchGeo where useful
+
+Graph learning
+
+PyTorch Geometric for later spatiotemporal graph models
+
+Numerical
+
+NumPy
+
+SciPy
+
+Pandas or Polars
+
+12. ML Architecture Roadmap
+
+V1
+
+Transparent baseline risk model using verified features.
+
+V2
+
+Probabilistic/temporal model.
+
+V3
+
+Spatiotemporal graph model for interacting slope units and infrastructure.
+
+Research extensions
+
+physics-informed time-to-failure;
+
+conformal risk calibration;
+
+geospatial foundation-model transfer;
+
+rainfall-forecast robustness;
+
+information-gain sensor placement.
+
+Do not adopt an advanced model merely because it is technically impressive. It must beat or materially improve the baseline on representative evaluation data.
+
+13. Risk Output Contract
+
+Conceptually:
+
+{
+  "slopeUnitId": "SLP-00182",
+  "timestamp": "...",
+  "probability": 0.17,
+  "riskLevel": "HIGH",
+  "confidence": {
+    "status": "HIGH",
+    "lower": 0.13,
+    "upper": 0.22
+  },
+  "modelVersion": "risk-v1.2.0",
+  "dataFreshness": "CURRENT",
+  "explanation": [
+    "high rainfall accumulation",
+    "elevated wetness state",
+    "high baseline susceptibility"
+  ]
+}
+
+Exact values in production must come from actual model outputs.
+
+14. Lifeline Graph
+
+Initial implementation
+
+NetworkX + geospatial preprocessing.
+
+Capabilities:
+
+graph creation;
+
+shortest path;
+
+edge removal simulation;
+
+component/isolation analysis;
+
+alternate route.
+
+Production evolution
+
+If scale/performance justifies it, evaluate:
+
+pgRouting;
+
+specialized graph service;
+
+graph database.
+
+Do not introduce Neo4j just because the concept uses a graph.
+
+14A. Community Intelligence Architecture
+
+Reporter
+  -> Next.js reporting UI
+  -> FastAPI upload/report endpoint
+  -> validation + rate limiting
+  -> private S3 evidence object
+  -> MongoDB CommunityReport
+  -> enrichment (slope/road/asset proximity)
+  -> verification pipeline
+  -> confidence / status
+  -> public awareness view or authority action queue
+  -> Warning Ledger link when an operational event is created
+
+Verification components
+
+Possible signals:
+
+image classification/quality checks;
+
+metadata/timestamp consistency;
+
+geospatial consistency;
+
+rainfall/risk correlation;
+
+satellite/change detection;
+
+InSAR;
+
+sensor evidence;
+
+independent report clustering.
+
+The architecture must support a rules-based baseline before introducing a trained image-verification model. Model outputs are advisory and must not silently authorize public emergency alerts.
+
+Upload security
+
+Store evidence in private S3 buckets.
+
+Never trust client MIME/type alone.
+
+Enforce object-size limits.
+
+Sanitize filenames/object keys.
+
+Generate server-side object identifiers.
+
+Apply malware scanning strategy where required.
+
+Strip or control public exposure of sensitive media metadata.
+
+Use signed access URLs for authorized viewers.
+
+Keep source/provenance metadata separate from public presentation metadata.
+
+Privacy
+
+Collect the minimum reporter identity required for abuse prevention, follow-up, or authorization workflows. Do not expose precise reporter identity publicly by default. Exact coordinates may be generalized in public views where safety/privacy policy requires it.
+
+Duplicate and cluster handling
+
+Use spatial/temporal similarity to identify potential duplicates, but never discard an original report solely because it matches another report. Preserve independent provenance.
+
+15. IoT / MQTT
+
+Potential flow:
+
+Sensor
+  -> LoRa/other field transport
+  -> Gateway
+  -> MQTT
+  -> ingestion service
+  -> validation
+  -> MongoDB / time-oriented storage strategy
+  -> risk engine
+
+Sensor state must include:
+
+last seen;
+
+battery;
+
+connectivity;
+
+measurement quality;
+
+calibration status where supported.
+
+Offline sensor != normal sensor.
+
+16. Alert Architecture
+
+Sentinel NER produces a governed alert object.
+
+Risk / event
+    -> consequence
+    -> recommendation
+    -> human authorization
+    -> CAP-compatible alert
+    -> external dissemination adapter
+
+Potential adapters:
+
+C-DOT/SACHET where authorized and available;
+
+SMS/provider;
+
+push;
+
+email;
+
+IVR/voice;
+
+field channels.
+
+Keep provider-specific logic behind adapters.
+
+17. Multilingual Layer
+
+Use a provider abstraction for Indian-language translation/speech capabilities, with Bhashini as a possible integration where approved/available.
+
+Important rules:
+
+AI-generated alert text must be reviewable;
+
+language must be explicitly selected;
+
+translation failure must not silently send the wrong language;
+
+original authoritative text must be retained.
+
+18. Offline Architecture
+
+Field PWA should have explicit states:
+
+LIVE
+CACHED
+STALE
+OFFLINE
+UNSYNCED
+SYNCING
+SYNC FAILED
+
+Local data:
+
+assigned tasks;
+
+cached risk snapshot;
+
+relevant map tiles/data;
+
+playbooks;
+
+queued reports;
+
+sync metadata.
+
+Use IndexedDB for durable local application state.
+
+19. QR Offline Sync
+
+Flow:
+
+Field device
+  -> queued reports
+  -> integrity-protected chunks
+  -> QR sequence
+  -> DDMA laptop camera
+  -> decode
+  -> validate checksum/signature
+  -> deduplicate
+  -> import
+  -> audit event
+
+The system must reject partial/corrupt transfers safely.
+
+20. Security
+
+Authentication
+
+JWT/OAuth2-compatible architecture.
+
+Authorization
+
+RBAC enforced server-side.
+
+Secrets
+
+Use AWS Secrets Manager/SSM or equivalent secure secret mechanism in production.
+
+API security
+
+validation;
+
+rate limiting;
+
+safe CORS;
+
+secure headers;
+
+request IDs;
+
+log redaction.
+
+Data
+
+encryption in transit;
+
+encryption at rest;
+
+least privilege;
+
+backup policies.
+
+File uploads
+
+MIME/type validation;
+
+size limits;
+
+safe filename handling;
+
+malware scanning strategy where required;
+
+private storage.
+
+21. Warning Ledger
+
+Use MongoDB append-only records with a chained hash.
+
+Concept:
+
+Event 001
+hash = A
+
+Event 002
+previousHash = A
+hash = B
+
+Event 003
+previousHash = B
+hash = C
+
+The ledger should preserve enough data to reconstruct:
+
+prediction;
+
+recommendation;
+
+authorization;
+
+alert;
+
+acknowledgement;
+
+action;
+
+outcome.
+
+Do not use blockchain unless a concrete governance requirement exists.
+
+22. AWS Deployment Baseline
+
+Initial production deployment
+
+Prefer the simplest reliable AWS deployment that meets the operational requirements.
+
+Possible baseline:
+
+CloudFront/HTTPS edge where appropriate;
+
+Next.js application on a managed AWS-compatible deployment or ECS/EC2 depending on hosting constraints;
+
+FastAPI on ECS/EC2;
+
+S3;
+
+MongoDB Atlas;
+
+Redis;
+
+CloudWatch;
+
+Sentry.
+
+The final infrastructure choice should be validated against:
+
+expected traffic;
+
+compute needs;
+
+ML/GPU requirements;
+
+operational team capability;
+
+cost;
+
+government/compliance requirements.
+
+Do not use EKS/Kubernetes unless justified by real deployment needs.
+
+23. CI/CD
+
+GitHub Actions pipeline:
+
+git push
+  -> lint
+  -> type check
+  -> unit tests
+  -> integration tests
+  -> E2E tests
+  -> dependency/security scan
+  -> build
+  -> artifact/container validation
+  -> deploy to staging
+  -> smoke tests
+  -> production approval
+  -> deploy
+
+Production deployments must have rollback procedures.
+
+24. Observability
+
+AWS CloudWatch
+
+logs;
+
+metrics;
+
+alarms;
+
+health signals.
+
+Sentry
+
+application errors;
+
+frontend exceptions;
+
+backend exceptions;
+
+release correlation.
+
+Metrics
+
+Track:
+
+API latency;
+
+job duration;
+
+queue depth;
+
+data freshness;
+
+satellite processing failures;
+
+sensor ingestion lag;
+
+alert generation/authorization latency;
+
+sync failures;
+
+database performance.
+
+25. Testing Strategy
+
+Unit
+
+domain logic;
+
+risk calculations;
+
+permission checks;
+
+graph algorithms;
+
+parsers.
+
+Integration
+
+MongoDB Atlas test environment;
+
+S3;
+
+Redis;
+
+external adapters;
+
+authentication.
+
+E2E
+
+Critical flows:
+
+login → command center;
+
+event → action;
+
+action → approval;
+
+approval → alert object;
+
+alert → ledger;
+
+offline report → sync;
+
+road failure → isolation.
+
+ML validation
+
+temporal holdout;
+
+spatial holdout;
+
+calibration;
+
+false-alarm evaluation;
+
+lead-time analysis;
+
+data leakage checks.
+
+26. Performance Targets
+
+Targets are to be measured, not assumed.
+
+Initial engineering goals:
+
+fast first meaningful interface load on constrained networks;
+
+bounded API response times for common dashboard operations;
+
+map queries must use appropriate spatial indexes;
+
+heavy raster/ML jobs asynchronous;
+
+no full-dataset transfers to browsers;
+
+large tables virtualized/paginated.
+
+Final SLOs should be set after realistic load testing.
+
+27. Production Data Strategy
+
+Live external observations
+
+Store provenance, source timestamp, ingestion timestamp, quality state, and freshness.
+
+Model outputs
+
+Store model version and feature snapshot/reference.
+
+Heavy geospatial objects
+
+Store in S3.
+
+Operational records
+
+Store in MongoDB Atlas.
+
+Cache
+
+Redis only.
+
+28. Repository Structure
+
+Suggested structure:
+
+sentinel-ner/
+├── apps/
+│   ├── web/
+│   └── api/
+├── packages/
+│   ├── ui/
+│   ├── types/
+│   └── config/
+├── services/
+│   ├── ingestion/
+│   ├── geospatial/
+│   ├── ml/
+│   ├── notifications/
+│   └── workers/
+├── infrastructure/
+│   ├── docker/
+│   ├── aws/
+│   └── ci/
+├── docs/
+├── tests/
+└── scripts/
+
+A simpler monorepo or current-repository equivalent is acceptable if it preserves clear boundaries.
+
+29. Environment Separation
+
+At minimum:
+
+local;
+
+test;
+
+staging;
+
+production.
+
+Never reuse production credentials in local/test environments.
+
+External integrations must have explicit environment configuration.
+
+30. Architecture Decision Rules
+
+Choose MongoDB
+
+for operational document data and geospatial operational queries.
+
+Choose S3
+
+for large files and scientific artifacts.
+
+Choose Redis
+
+for transient/cache state.
+
+Choose Celery
+
+for asynchronous Python jobs.
+
+Choose NetworkX first
+
+for initial network analysis.
+
+Add Kafka later
+
+only when event throughput/architecture requires it.
+
+Add Neo4j later
+
+only if graph workload proves the need.
+
+Add Kubernetes later
+
+only if scale/operations justify it.
+
+Add GPU infrastructure
+
+only for measured ML workload requirements.
+
+31. Technology Governance
+
+Every dependency added should have:
+
+a purpose;
+
+license compatibility checked;
+
+maintenance/community assessment;
+
+security risk considered;
+
+operational cost considered.
+
+Do not add libraries for functionality already present in the selected stack without a reason.

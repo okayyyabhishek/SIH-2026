@@ -1,0 +1,744 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   GOVERNMENT OF INDIA — GIGW 3.0 DESIGN SYSTEM
+   Standardized Palette: National Blue, Saffron, Green, Gold, Crisp Slate
+   ========================================================================== */
+
+:root {
+  --gov-blue: #003366;
+  --gov-blue-dark: #002147;
+  --gov-blue-light: #004D99;
+  --gov-saffron: #FF9933;
+  --gov-saffron-dark: #E06D00;
+  --gov-green: #138808;
+  --gov-green-dark: #0F6806;
+  --gov-gold: #D4AF37;
+  --gov-bg: #F4F6F9;
+  --gov-surface: #FFFFFF;
+  --gov-border: #DDE2E5;
+  --gov-text-primary: #1A202C;
+  --gov-text-secondary: #4A5568;
+  --gov-text-muted: #718096;
+}
+
+/* ==========================================================================
+   BASE & TYPOGRAPHY
+   ========================================================================== */
+
+html, body {
+  background-color: #F8FAFC;
+  color: #0F172A;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-inter), var(--font-noto-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY (GIGW 3.0 & WCAG 2.2 LEVEL AA)
+   ========================================================================== */
+
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--gov-blue);
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  transition: top 0.15s ease-out;
+  text-decoration: none;
+}
+.skip-to-content:focus {
+  top: 1rem;
+  outline: 3px solid var(--gov-saffron);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--gov-blue) !important;
+  outline-offset: 2px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   GIGW 3.0 GOVERNMENT COMPONENT CLASSES
+   ========================================================================== */
+
+.gov-card {
+  background-color: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.gov-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 51, 102, 0.08), 0 0 0 1px rgba(0, 51, 102, 0.06);
+  transform: translateY(-1px);
+}
+
+.gov-section-header {
+  padding-bottom: 0.875rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #E2E8F0;
+  position: relative;
+}
+.gov-section-header::after {
+  content: "";
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 72px; height: 3px;
+  background: linear-gradient(90deg, var(--gov-saffron), var(--gov-blue));
+  border-radius: 2px;
+}
+
+.gov-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  border: 1px solid;
+}
+.gov-badge-blue    { background: #EFF6FF; border-color: #BFDBFE; color: #1E40AF; }
+.gov-badge-saffron { background: #FFF7ED; border-color: #FED7AA; color: #C2410C; }
+.gov-badge-green   { background: #F0FDF4; border-color: #BBF7D0; color: #15803D; }
+.gov-badge-red     { background: #FEF2F2; border-color: #FECACA; color: #B91C1C; }
+
+.gov-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.gov-btn-primary          { background: var(--gov-blue); color: #fff; border-color: var(--gov-blue); }
+.gov-btn-primary:hover    { background: var(--gov-blue-dark); }
+.gov-btn-secondary        { background: #fff; color: var(--gov-blue); border-color: var(--gov-blue); }
+.gov-btn-secondary:hover  { background: #F0F4FF; }
+.gov-btn-saffron          { background: var(--gov-saffron); color: #fff; border-color: var(--gov-saffron); }
+.gov-btn-saffron:hover    { background: var(--gov-saffron-dark); }
+
+.gov-stat-card {
+  background: linear-gradient(135deg, #ffffff, #F8FAFC);
+  border: 1px solid #E2E8F0;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+.gov-stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--gov-blue);
+  border-radius: 0.75rem 0 0 0.75rem;
+}
+
+.gov-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #475569;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+.gov-nav-item:hover          { background: #F1F5F9; color: #0F172A; }
+.gov-nav-item-active         { background: #EFF6FF; color: var(--gov-blue); border-color: #BFDBFE; font-weight: 600; }
+.gov-nav-item-active svg     { color: var(--gov-blue); }
+
+/* Custom Scrollbars */
+::-webkit-scrollbar              { width: 8px; height: 8px; }
+::-webkit-scrollbar-track        { background: #F1F5F9; }
+::-webkit-scrollbar-thumb        { background: #CBD5E1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover  { background: #94A3B8; }
+
+.sentinel-dark-tiles {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
+}
+
+/* ==========================================================================
+   LIGHT MODE — ACCESSIBLE CLEAN PORTAL STYLING
+   ========================================================================== */
+
+html.light body {
+  background-color: #F8FAFC;
+  color: #0F172A;
+}
+
+html.light .gov-card {
+  background: #FFFFFF;
+  border-color: #E2E8F0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.light .liquid-panel {
+  background: #FFFFFF;
+  border-color: #E2E8F0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+html.light .liquid-panel:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+}
+
+html.light .sentinel-dark-tiles {
+  filter: none;
+}
+
+/* Light Mode Sentinel Surfaces & Contrast Harmonization */
+html.light [class*="bg-sentinel-950"] {
+  background-color: #F8FAFC !important;
+}
+
+html.light [class*="bg-sentinel-900"] {
+  background-color: #FFFFFF !important;
+}
+
+html.light [class*="border-sentinel-800"]:not([class*="border-l-"]),
+html.light [class*="border-sentinel-700"]:not([class*="border-l-"]),
+html.light .border-sentinel-800,
+html.light .border-sentinel-700 {
+  border-color: #E2E8F0 !important;
+}
+
+html.light [class*="border-sentinel-800"][class*="border-l-"],
+html.light [class*="border-sentinel-700"][class*="border-l-"] {
+  border-top-color: #E2E8F0 !important;
+  border-right-color: #E2E8F0 !important;
+  border-bottom-color: #E2E8F0 !important;
+}
+
+html.light .divide-sentinel-800 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #E2E8F0 !important;
+}
+
+html.light thead.bg-sentinel-950,
+html.light thead.bg-sentinel-900\/80 {
+  background-color: #F1F5F9 !important;
+  color: #334155 !important;
+  border-bottom-color: #E2E8F0 !important;
+}
+
+html.light select.bg-sentinel-950,
+html.light input.bg-sentinel-950,
+html.light select.bg-sentinel-900,
+html.light input.bg-sentinel-900 {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* Light Mode Typography Harmonization: Ensure text-white on light surfaces adapts to dark slate unless on colored buttons or in the dark navbar */
+html.light main h1.text-white,
+html.light main h2.text-white,
+html.light main h3.text-white,
+html.light main h4.text-white,
+html.light .gov-card h1.text-white,
+html.light .gov-card h2.text-white,
+html.light .gov-card h3.text-white,
+html.light [class*="bg-sentinel"] .text-white:not(button):not([class*="bg-emerald"]):not([class*="bg-red"]):not([class*="bg-amber"]):not([class*="bg-blue"]):not([class*="bg-cyan"]):not([class*="bg-indigo"]) {
+  color: #0F172A !important;
+}
+
+html.light [class*="bg-sentinel"] .text-slate-200,
+html.light [class*="bg-white"] .text-slate-200,
+html.light [class*="bg-slate-50"] .text-slate-200,
+html.light .liquid-panel .text-slate-200 {
+  color: #1E293B !important;
+}
+
+html.light [class*="bg-sentinel"] .text-slate-300,
+html.light [class*="bg-white"] .text-slate-300,
+html.light [class*="bg-slate-50"] .text-slate-300,
+html.light .liquid-panel .text-slate-300 {
+  color: #334155 !important;
+}
+
+html.light [class*="bg-sentinel"] .text-slate-400,
+html.light [class*="bg-white"] .text-slate-400,
+html.light [class*="bg-slate-50"] .text-slate-400,
+html.light .liquid-panel .text-slate-400 {
+  color: #64748B !important;
+}
+
+/* ==========================================================================
+   GOVERNMENT PORTAL TOP NAVIGATION BAR STYLING
+   Preserves crisp white/amber text on the dark blue bar while isolating
+   all dropdowns, popovers, and mega menus from inheritance.
+   ========================================================================== */
+
+/* Top bar strip text defaults (only for direct/top-level bar content) */
+.sentinel-top-nav {
+  color: #FFFFFF;
+}
+
+html.light .sentinel-top-nav a.sentinel-nav-link,
+html.light .sentinel-top-nav button.sentinel-category-btn {
+  color: #FFFFFF !important;
+}
+
+html.light .sentinel-top-nav a.sentinel-nav-link:hover,
+html.light .sentinel-top-nav button.sentinel-category-btn:hover {
+  color: #FFFFFF !important;
+}
+
+html.light .sentinel-top-nav .sentinel-nav-link.active,
+html.light .sentinel-top-nav .sentinel-category-btn.active,
+html.light .sentinel-top-nav .text-amber-300 {
+  color: #FCD34D !important;
+}
+
+html.light .sentinel-top-nav .text-gov-saffron {
+  color: var(--gov-saffron) !important;
+}
+
+/* ==========================================================================
+   SENTINEL MEGA MENU DROPDOWN PANEL
+   Ensures crystal-clear contrast, readable typography, and proper theme handling.
+   ========================================================================== */
+
+.sentinel-mega-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  width: 100%;
+  z-index: 50;
+  box-shadow: 0 25px 50px -12px rgba(0, 33, 71, 0.25), 0 0 0 1px rgba(0, 51, 102, 0.08);
+}
+
+/* Light Theme: Clean, High-Contrast Government Aesthetic */
+html.light .sentinel-mega-dropdown {
+  background-color: rgba(255, 255, 255, 0.98);
+  border-bottom: 2px solid #E2E8F0;
+  color: #0F172A;
+}
+
+html.light .sentinel-mega-dropdown h3,
+html.light .sentinel-mega-dropdown h4,
+html.light .sentinel-mega-dropdown h5 {
+  color: #0F172A;
+}
+
+html.light .sentinel-mega-dropdown .mega-column-heading {
+  color: #1E293B;
+  border-bottom-color: #E2E8F0;
+}
+
+html.light .sentinel-mega-dropdown a.mega-item-link {
+  color: #1E293B;
+  border-color: transparent;
+}
+
+html.light .sentinel-mega-dropdown a.mega-item-link:hover {
+  background-color: #F8FAFC;
+  border-color: #E2E8F0;
+}
+
+html.light .sentinel-mega-dropdown a.mega-item-link.active {
+  background-color: #EFF6FF;
+  border-color: #BFDBFE;
+  color: var(--gov-blue);
+}
+
+html.light .sentinel-mega-dropdown .mega-item-title {
+  color: #0F172A;
+}
+
+html.light .sentinel-mega-dropdown a.mega-item-link:hover .mega-item-title {
+  color: var(--gov-blue);
+}
+
+html.light .sentinel-mega-dropdown .mega-item-desc {
+  color: #64748B;
+}
+
+html.light .sentinel-mega-dropdown a.mega-item-link:hover .mega-item-desc {
+  color: #334155;
+}
+
+html.light .sentinel-mega-dropdown .mega-item-icon-box {
+  background-color: #F1F5F9;
+  border-color: #E2E8F0;
+  color: #475569;
+}
+
+html.light .sentinel-mega-dropdown a.mega-item-link:hover .mega-item-icon-box {
+  background-color: var(--gov-blue);
+  border-color: transparent;
+  color: #FFFFFF;
+}
+
+html.light .sentinel-mega-dropdown .mega-action-link:not(.bg-gov-blue):not(.mega-featured-btn) {
+  color: var(--gov-blue);
+}
+
+html.light .sentinel-mega-dropdown .mega-action-link:hover {
+  color: #FFFFFF !important;
+}
+
+html.light .sentinel-mega-dropdown .mega-featured-btn,
+html.light .sentinel-mega-dropdown a.bg-gov-blue,
+html.light .sentinel-mega-dropdown a.mega-featured-btn {
+  color: #FFFFFF !important;
+  background-color: var(--gov-blue) !important;
+}
+
+html.light .sentinel-mega-dropdown a.mega-featured-btn:hover {
+  color: #FFFFFF !important;
+  background-color: var(--gov-blue-dark) !important;
+}
+
+/* Badge colors in Light Theme */
+html.light .sentinel-mega-dropdown .badge-cyan {
+  background-color: #ECFEFF;
+  color: #0E7490;
+  border-color: #A5F3FC;
+}
+html.light .sentinel-mega-dropdown .badge-amber {
+  background-color: #FFFBEB;
+  color: #B45309;
+  border-color: #FDE68A;
+}
+html.light .sentinel-mega-dropdown .badge-emerald {
+  background-color: #ECFDF5;
+  color: #047857;
+  border-color: #A7F3D0;
+}
+html.light .sentinel-mega-dropdown .badge-purple {
+  background-color: #FAF5FF;
+  color: #7E22CE;
+  border-color: #E9D5FF;
+}
+html.light .sentinel-mega-dropdown .badge-rose {
+  background-color: #FFF1F2;
+  color: #BE123C;
+  border-color: #FECDD3;
+}
+
+/* Dark Theme */
+html.dark .sentinel-mega-dropdown {
+  background-color: rgba(5, 10, 20, 0.98);
+  border-bottom: 2px solid #1E293B;
+  color: #F8FAFC;
+}
+
+html.dark .sentinel-mega-dropdown h3,
+html.dark .sentinel-mega-dropdown h5 {
+  color: #F8FAFC;
+}
+
+html.dark .sentinel-mega-dropdown .mega-column-heading {
+  color: #E2E8F0;
+  border-bottom-color: rgba(30, 41, 59, 0.8);
+}
+
+html.dark .sentinel-mega-dropdown a.mega-item-link {
+  color: #94A3B8;
+}
+
+html.dark .sentinel-mega-dropdown a.mega-item-link:hover {
+  background-color: rgba(15, 23, 42, 0.8);
+  border-color: #1E293B;
+  color: #FFFFFF;
+}
+
+html.dark .sentinel-mega-dropdown a.mega-item-link.active {
+  background-color: rgba(6, 182, 212, 0.12);
+  border-color: rgba(6, 182, 212, 0.4);
+  color: #38BDF8;
+}
+
+html.dark .sentinel-mega-dropdown .mega-item-title {
+  color: #F1F5F9;
+}
+
+html.dark .sentinel-mega-dropdown a.mega-item-link:hover .mega-item-title {
+  color: #38BDF8;
+}
+
+html.dark .sentinel-mega-dropdown .mega-item-desc {
+  color: #94A3B8;
+}
+
+html.dark .sentinel-mega-dropdown .mega-item-icon-box {
+  background-color: #0A0F18;
+  border-color: #1E293B;
+  color: #94A3B8;
+}
+
+html.dark .sentinel-mega-dropdown a.mega-item-link:hover .mega-item-icon-box {
+  background-color: #06B6D4;
+  border-color: transparent;
+  color: #020617;
+}
+
+html.dark .sentinel-mega-dropdown .mega-action-link:not(.mega-featured-btn) {
+  color: #38BDF8;
+}
+
+html.dark .sentinel-mega-dropdown .mega-featured-btn,
+html.dark .sentinel-mega-dropdown a.mega-featured-btn {
+  color: #020617 !important;
+  background-color: #06B6D4 !important;
+}
+
+html.dark .sentinel-mega-dropdown a.mega-featured-btn:hover {
+  color: #020617 !important;
+  background-color: #22D3EE !important;
+}
+
+/* ==========================================================================
+   LIQUID PANEL BACKWARD COMPATIBILITY
+   ========================================================================== */
+
+.liquid-panel {
+  background: rgba(10, 16, 32, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.liquid-panel:hover {
+  border-color: rgba(6, 182, 212, 0.4);
+  box-shadow: 0 12px 40px 0 rgba(6, 182, 212, 0.12);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px -2px rgba(6, 182, 212, 0.35);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 20px -2px rgba(16, 185, 129, 0.35);
+}
+
+.glow-rose {
+  box-shadow: 0 0 20px -2px rgba(244, 63, 94, 0.35);
+}
+
+.glow-amber {
+  box-shadow: 0 0 20px -2px rgba(245, 158, 11, 0.35);
+}
+
+/* ==========================================================================
+   DARK THEME (OPERATIONAL NIGHT DECK)
+   ========================================================================== */
+
+html.dark, html.dark body {
+  --gov-blue: #0EA5E9;
+  background: #06090E !important;
+  color: #F8FAFC !important;
+}
+
+html.dark .gov-card          { background: #0A0F18; border-color: rgba(148,163,184,0.12); box-shadow: 0 2px 8px rgba(0,0,0,0.37); }
+html.dark .gov-card:hover    { border-color: rgba(148,163,184,0.25); box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+html.dark .gov-stat-card     { background: linear-gradient(135deg, #0A0F18, #0F1624); border-color: rgba(148,163,184,0.12); }
+html.dark .gov-stat-card::before { background: #00D2FF; }
+html.dark .gov-section-header    { border-color: rgba(148,163,184,0.12); }
+html.dark .gov-section-header::after { background: linear-gradient(90deg, #00D2FF, #3B82F6); }
+
+html.dark .gov-badge-blue    { background: rgba(0,210,255,0.1); border-color: rgba(0,210,255,0.3); color: #67E8F9; }
+html.dark .gov-badge-saffron { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #FBBF24; }
+html.dark .gov-badge-green   { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.3); color: #34D399; }
+html.dark .gov-badge-red     { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.3); color: #F87171; }
+
+html.dark .gov-btn-primary        { background: #0284C7; border-color: #0284C7; }
+html.dark .gov-btn-primary:hover  { background: #0369A1; }
+html.dark .gov-btn-secondary      { background: transparent; color: #67E8F9; border-color: rgba(0,210,255,0.4); }
+html.dark .gov-btn-secondary:hover { background: rgba(0,210,255,0.08); }
+
+html.dark .gov-nav-item         { color: #94A3B8; }
+html.dark .gov-nav-item:hover   { background: rgba(148,163,184,0.08); color: #F1F5F9; }
+html.dark .gov-nav-item-active  { background: rgba(0,210,255,0.08); color: #67E8F9; border-color: rgba(0,210,255,0.25); }
+
+html.dark ::-webkit-scrollbar-track       { background: #06090E; }
+html.dark ::-webkit-scrollbar-thumb       { background: #1E2C45; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: #2D3F5E; }
+
+/* ==========================================================================
+   HIGH CONTRAST (WCAG 2.2 AAA COMPLIANT)
+   ========================================================================== */
+
+html.high-contrast, html.high-contrast body {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+html.high-contrast .gov-card      { background: #000000; border-color: #FFFFFF; }
+html.high-contrast .gov-stat-card { background: #000000; border-color: #FFFFFF; }
+html.high-contrast .gov-stat-card::before { background: #FFFF00; }
+html.high-contrast * { border-color: rgba(255,255,255,0.45) !important; }
+html.high-contrast button:focus-visible,
+html.high-contrast a:focus-visible { outline: 3px solid #FFFF00 !important; }
+
+/* High Contrast Theme for Sentinel Mega Dropdown */
+html.high-contrast .sentinel-mega-dropdown {
+  background-color: #000000 !important;
+  border-bottom: 3px solid #FFFFFF !important;
+  color: #FFFFFF !important;
+}
+
+html.high-contrast .sentinel-mega-dropdown h3,
+html.high-contrast .sentinel-mega-dropdown h4,
+html.high-contrast .sentinel-mega-dropdown h5,
+html.high-contrast .sentinel-mega-dropdown .mega-column-heading,
+html.high-contrast .sentinel-mega-dropdown .mega-item-title {
+  color: #FFFFFF !important;
+}
+
+html.high-contrast .sentinel-mega-dropdown a.mega-item-link {
+  color: #FFFFFF !important;
+  border-color: #555555 !important;
+}
+
+html.high-contrast .sentinel-mega-dropdown a.mega-item-link:hover,
+html.high-contrast .sentinel-mega-dropdown a.mega-item-link.active {
+  background-color: #111111 !important;
+  border-color: #FFFF00 !important;
+  color: #FFFF00 !important;
+}
+
+html.high-contrast .sentinel-mega-dropdown a.mega-item-link:hover .mega-item-title,
+html.high-contrast .sentinel-mega-dropdown a.mega-item-link.active .mega-item-title {
+  color: #FFFF00 !important;
+}
+
+html.high-contrast .sentinel-mega-dropdown .mega-item-desc {
+  color: #CCCCCC !important;
+}
+
+html.high-contrast .sentinel-mega-dropdown .mega-featured-card {
+  background: #000000 !important;
+  border: 2px solid #FFFFFF !important;
+}
+
+html.high-contrast .sentinel-mega-dropdown .mega-featured-btn,
+html.high-contrast .sentinel-mega-dropdown a.mega-featured-btn {
+  background-color: #FFFF00 !important;
+  color: #000000 !important;
+  border: 2px solid #FFFFFF !important;
+  font-weight: 900 !important;
+}
+
+html.high-contrast .sentinel-mega-dropdown .mega-action-link {
+  background-color: #000000 !important;
+  color: #FFFF00 !important;
+  border: 2px solid #FFFF00 !important;
+}
+
+/* ==========================================================================
+   LEAFLET MAP CONTROLS & TOOLTIP THEME STYLING
+   ========================================================================== */
+
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-bar {
+  border-radius: 0.375rem !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  overflow: hidden;
+}
+
+html.dark .leaflet-bar {
+  border: 1px solid #1e2c45 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.leaflet-bar a {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.leaflet-bar a:hover {
+  background-color: #f1f5f9 !important;
+  color: #003366 !important;
+}
+
+html.dark .leaflet-bar a {
+  background-color: #0a0f18 !important;
+  color: #e2e8f0 !important;
+  border-bottom: 1px solid #1e2c45 !important;
+}
+
+html.dark .leaflet-bar a:hover {
+  background-color: #152033 !important;
+  color: #38bdf8 !important;
+}
+
+.sentinel-map-tooltip {
+  background-color: rgba(15, 23, 42, 0.92) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  color: #f8fafc !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  border-radius: 0.375rem !important;
+  padding: 6px 10px !important;
+  box-shadow: 0 8px 20px -2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.sentinel-map-tooltip::before {
+  border-top-color: rgba(15, 23, 42, 0.92) !important;
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS & TOUCH OPTIMIZATION
+   ========================================================================== */
+
+.overflow-x-auto,
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+  /* Prevent horizontal content overflow on compact mobile devices */
+  body {
+    overflow-x: hidden;
+  }
+}
+

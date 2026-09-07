@@ -1,0 +1,966 @@
+SENTINEL NER — PRODUCT REQUIREMENTS DOCUMENT (PRD)
+
+Product: Sentinel NER — Landslide Operational Intelligence & Intervention Platform
+Target: Production system for Northeast India
+Primary deployment model: AWS + MongoDB Atlas
+Document status: Product baseline for implementation
+
+1. Product Overview
+
+Sentinel NER is an operational landslide intelligence platform designed to convert heterogeneous environmental, geospatial, infrastructure, and field observations into actionable decisions for government and emergency-management stakeholders.
+
+It is explicitly not a replacement for national hazard agencies. It should consume existing intelligence and add a decision, consequence, accountability, and field-operations layer.
+
+Core proposition:
+
+Detect → Predict → Understand Consequences → Decide → Act → Verify → Learn
+
+2. Problem Statement
+
+Existing landslide capabilities can provide susceptibility, rainfall-based forecasts, monitoring, maps, and alerts. The unresolved operational problem is connecting those outputs to a specific decision:
+
+Which exact slope is becoming more dangerous?
+
+Which road chainage is at risk?
+
+Which villages or critical assets could become isolated?
+
+How certain is the assessment?
+
+Who needs to act?
+
+What action should happen by when?
+
+Who authorized the warning?
+
+What actually happened afterward?
+
+Sentinel NER is designed around this operational gap.
+
+3. Product Goals
+
+Primary goals
+
+Provide slope-level operational risk intelligence.
+
+Detect meaningful environmental/anthropogenic changes that alter risk.
+
+Translate slope risk into road and asset consequences.
+
+Provide ranked, time-bound actions.
+
+Preserve human authorization for public warnings and legally significant actions.
+
+Operate under degraded connectivity.
+
+Maintain an auditable forecast-to-outcome history.
+
+Quantify uncertainty and system performance.
+
+Support multilingual and field-oriented workflows.
+
+Secondary goals
+
+Support citizen/field reports.
+
+Support sensor operations.
+
+Support scenario analysis.
+
+Support model improvement and governance.
+
+4. Non-Goals
+
+The first production roadmap does not aim to:
+
+replace GSI/NLFC;
+
+replace IMD or ISRO/NRSC;
+
+create a national cell-broadcast platform from scratch;
+
+claim that any ML model is scientifically validated without representative evaluation;
+
+automate public emergency warnings without authorization;
+
+put all satellite data directly into the primary database;
+
+build unnecessary distributed infrastructure;
+
+treat a visually impressive map as the product itself.
+
+5. Primary Users
+
+District Disaster Management Authority
+
+Needs situation awareness, action prioritization, warning authorization, evacuation decisions, and accountability.
+
+PWD / NHIDCL / BRO
+
+Needs chainage-specific hazard, road disruption probability, alternate routes, isolation impact, equipment staging recommendations, and action status.
+
+Railway / infrastructure authorities
+
+Needs corridor risk, affected assets, field evidence, and incident workflows.
+
+Field officers
+
+Needs offline-capable tasks, maps, reporting, evidence, and synchronization.
+
+State-level authorities
+
+Needs cross-district monitoring, trends, performance, alerts, and governance.
+
+Citizen / community reporter
+
+Needs simple, accessible reporting and appropriate warnings/instructions.
+
+Auditor / observer
+
+Needs read-only traceability of decisions, alerts, actions, and outcomes.
+
+6. Core User Journeys
+
+Journey A — Escalating slope risk
+
+New satellite/environmental change detected.
+
+Change is linked to slope unit.
+
+Risk engine updates prediction.
+
+Confidence and evidence are calculated.
+
+Affected roads/assets are identified.
+
+Consequence engine calculates potential disruption.
+
+Action queue creates/re-ranks an operational task.
+
+Responsible authority receives task.
+
+Authority acts/dismisses with reason.
+
+Event is recorded in Warning Ledger.
+
+Journey B — Rapid/zero-warning situation
+
+High-risk slope has configured rapid-response profile.
+
+Rapid observation or sensor trigger arrives.
+
+System validates data state and confidence.
+
+Predefined response playbook is instantiated.
+
+Authorized operator reviews the action.
+
+Appropriate warning/restriction is issued.
+
+Action and outcome are recorded.
+
+Journey C — Road isolation
+
+Slope risk increases near road chainage.
+
+Road graph calculates likely edge failure impact.
+
+Affected settlements/assets are identified.
+
+Alternate route is calculated.
+
+Isolation estimate is generated.
+
+PWD/DDMA receives recommended action.
+
+Journey D — Offline field reporting
+
+Field officer loses network.
+
+App enters explicit offline state.
+
+Officer captures report/photo/location.
+
+Report is queued locally.
+
+Officer returns to network or uses QR sync.
+
+Server validates and merges report.
+
+Provenance is retained.
+
+Journey E — Community intelligence
+
+Resident/traveller observes a landslide or obstruction.
+
+User opens public reporting flow.
+
+User captures/uploads media and location.
+
+Report is submitted and receives a visible processing state.
+
+System enriches the report with nearby slope/road/asset context.
+
+Verification service cross-checks available evidence.
+
+Report becomes probable, verified, unverified, or rejected.
+
+Credible local information is surfaced to nearby/route users according to policy.
+
+If escalation is warranted, an authorized operator receives an action task.
+
+Report and resulting action/outcome are linked in the operational ledger.
+
+7. Functional Requirements
+
+FR-1 Command Center
+
+The home screen must present a ranked operational action queue rather than a generic map.
+
+Each action card must include, when available:
+
+priority;
+
+risk level;
+
+probability;
+
+confidence/status;
+
+location;
+
+affected asset/road;
+
+consequence;
+
+recommended action;
+
+owner;
+
+deadline;
+
+status;
+
+evidence access;
+
+ACT;
+
+DISMISS WITH REASON.
+
+FR-2 Risk Engine
+
+The system shall calculate or ingest risk assessments using configured inputs such as:
+
+static susceptibility;
+
+rainfall;
+
+antecedent rainfall;
+
+wetness/soil state;
+
+terrain;
+
+historical event context;
+
+remote-sensing change;
+
+InSAR observations;
+
+sensor information;
+
+citizen/field observations.
+
+Outputs must preserve model version and data provenance.
+
+FR-3 Uncertainty
+
+Risk outputs shall support:
+
+probability;
+
+interval or uncertainty metadata;
+
+confidence/status;
+
+data freshness;
+
+model version.
+
+The product shall not imply certainty where none exists.
+
+FR-4 Slope Units
+
+Slope units shall be first-class entities with:
+
+geometry;
+
+terrain attributes;
+
+susceptibility;
+
+current risk;
+
+observations;
+
+change events;
+
+historical events;
+
+related roads/assets.
+
+FR-5 Slope-Change Radar
+
+The system shall ingest satellite-derived change observations and associate validated changes with slope units.
+
+A change event must contain:
+
+geometry;
+
+detection date/time;
+
+change category;
+
+source;
+
+confidence/data quality;
+
+evidence reference;
+
+affected slope unit(s);
+
+risk delta where calculable.
+
+FR-6 Creep Watch
+
+The system shall support InSAR-derived displacement observations and anomaly states.
+
+FR-7 Lifeline Graph
+
+Roads and important connectivity paths shall be represented as a graph.
+
+The graph must support:
+
+chainage-level assets;
+
+connectivity checks;
+
+alternate route calculation;
+
+isolation analysis;
+
+critical facility impact.
+
+FR-8 Consequence Engine
+
+A prediction should be convertible into operational consequence information, such as:
+
+affected settlements;
+
+affected critical facilities;
+
+route disruption;
+
+alternate route;
+
+estimated isolation duration;
+
+exposure metrics where verified data exist.
+
+FR-9 Forecast vs Interception Mode
+
+The platform shall support different operational profiles for:
+
+warning-possible events;
+
+rapid/interception events.
+
+The profile shall influence the recommended playbook and response window.
+
+FR-10 Action Engine
+
+The system shall generate role-aware recommended actions.
+
+Every action must have:
+
+owner;
+
+priority;
+
+action text;
+
+deadline or response window;
+
+evidence;
+
+reason;
+
+status.
+
+FR-11 Playbooks
+
+Playbooks shall be configurable by event type and responsible role.
+
+FR-12 Authorization
+
+Authorized users must be able to:
+
+review;
+
+approve;
+
+modify;
+
+reject;
+
+escalate.
+
+FR-13 Alerts
+
+The system shall create reviewable alert messages and support external dissemination adapters.
+
+FR-14 Multilingual
+
+Alert content must be prepared for multilingual delivery and remain human-reviewable.
+
+FR-15 Offline Field App
+
+The application must support:
+
+cached data;
+
+offline reports;
+
+local task lists;
+
+local evidence;
+
+eventual synchronization.
+
+FR-16 Community Intelligence & Citizen Reports
+
+Sentinel NER shall provide a first-class Community Intelligence workflow allowing local residents, travellers, drivers, volunteers, field personnel, and other contributors to report observed hazards.
+
+FR-16.1 Report submission
+
+Reports shall support, subject to device capability:
+
+hazard/event type;
+
+photo and/or video;
+
+GPS/location;
+
+capture/report timestamp;
+
+short description;
+
+optional severity/condition;
+
+optional reporter contact/account information.
+
+FR-16.2 Automatic enrichment
+
+The platform shall associate a submitted report with:
+
+nearest slope unit;
+
+nearest road/chainage;
+
+nearest settlement/critical asset where appropriate;
+
+geolocation accuracy;
+
+provenance/source type.
+
+FR-16.3 Verification states
+
+Reports shall use explicit states such as:
+
+SUBMITTED;
+
+PROCESSING;
+
+PROBABLE;
+
+VERIFIED;
+
+UNVERIFIED;
+
+ACTIONED;
+
+RESOLVED;
+
+REJECTED.
+
+Submission success must never imply verification.
+
+FR-16.4 Evidence fusion
+
+Verification may consider:
+
+media analysis;
+
+location/timestamp consistency;
+
+rainfall;
+
+existing risk;
+
+satellite/change evidence;
+
+InSAR;
+
+sensor observations;
+
+nearby independent reports.
+
+The verification result shall preserve its evidence sources and confidence/status.
+
+FR-16.5 Community hazard view
+
+Users shall be able to see recent community observations relevant to their location or route, subject to configured privacy and safety rules. The public view shall include report age, hazard type, location/area, and verification status.
+
+FR-16.6 Localized awareness
+
+For sufficiently credible events, the system may generate localized caution/awareness information for nearby residents or travellers. It shall not publish an authoritative emergency warning solely on the basis of an unverified public report. Legally significant/public emergency alerts remain subject to FR-12 authorization.
+
+FR-16.7 Abuse/privacy controls
+
+The workflow shall support:
+
+rate limiting;
+
+duplicate detection;
+
+moderation/rejection;
+
+suspicious-report handling;
+
+privacy-aware reporter identity;
+
+media/file validation;
+
+auditability of verification decisions.
+
+FR-17 Warning Ledger
+
+The system shall maintain a tamper-evident operational history linking prediction to action and outcome.
+
+FR-18 Performance Dashboard
+
+The product shall support measurement of:
+
+detection rate;
+
+false alarms;
+
+lead time;
+
+acknowledgement time;
+
+action completion;
+
+missed events;
+
+isolation-hours avoided.
+
+Metrics must indicate sample size, period, and data quality.
+
+FR-19 Scenario Analysis
+
+The system shall support controlled what-if scenarios with clearly labeled assumptions.
+
+FR-20 Auditability
+
+Privileged actions and material model/alert changes shall be traceable to an actor and timestamp.
+
+8. Non-Functional Requirements
+
+Security
+
+least-privilege authorization;
+
+encrypted transport;
+
+secure secret handling;
+
+input validation;
+
+file upload controls;
+
+rate limiting;
+
+audit logging;
+
+dependency scanning;
+
+safe error messages;
+
+backup and recovery procedures.
+
+Availability
+
+The platform should degrade gracefully where external data providers or WAN connectivity fail.
+
+Performance
+
+Critical operational screens should load quickly on constrained networks. Heavy geospatial processing must be asynchronous.
+
+Accessibility
+
+Target WCAG 2.2 AA with keyboard support, screen-reader semantics, sufficient contrast, focus management, touch-friendly controls, and reduced-motion support.
+
+Observability
+
+Every production-critical subsystem must expose health, errors, latency, and processing status.
+
+Maintainability
+
+Use typed contracts, modular domain services, automated tests, documentation, and controlled migrations.
+
+Data Integrity
+
+No stale, missing, synthetic, or uncertain external observation may silently appear as current verified reality.
+
+9. Information Architecture
+
+Primary navigation:
+
+Command Center
+
+Risk Map
+
+Active Events
+
+Lifeline Network
+
+Satellite Changes
+
+Creep Watch
+
+Action Queue
+
+Alerts
+
+Field Reports
+
+Playbooks
+
+Warning Ledger
+
+Analytics/Reports
+
+Settings/Admin
+
+The precise navigation may vary by role.
+
+10. Key UI Principles
+
+Action first
+
+The first question must be: What requires attention?
+
+Evidence second
+
+Every important risk should be expandable into supporting evidence.
+
+Map as context
+
+The map should support a decision rather than force users to search for one.
+
+Uncertainty visible
+
+Pair risk with confidence/data state.
+
+No color-only semantics
+
+Use texture, icons, labels, and contrast.
+
+Offline transparency
+
+Always show live/cached/stale/offline state.
+
+Responsible automation
+
+AI recommends; authorized people approve where required.
+
+11. Core Data Objects
+
+SlopeUnit
+
+id
+
+geometry
+
+district
+
+terrain attributes
+
+susceptibility
+
+current risk state
+
+related change events
+
+related observations
+
+related assets
+
+RiskPrediction
+
+id
+
+slopeUnitId
+
+timestamp
+
+probability
+
+confidence/interval
+
+risk level
+
+modelVersion
+
+feature snapshot reference
+
+explanation
+
+data freshness
+
+RiskDelta
+
+id
+
+slopeUnitId
+
+sourceEventId
+
+previous risk
+
+new risk
+
+delta
+
+reason
+
+evidence
+
+RoadChainage
+
+id
+
+roadId
+
+chainage
+
+geometry
+
+criticality
+
+linked slopes
+
+current disruption risk
+
+Action
+
+id
+
+eventId
+
+owner
+
+priority
+
+action
+
+deadline
+
+status
+
+createdBy
+
+acknowledgedBy
+
+completedAt
+
+dismissalReason
+
+WarningLedgerEvent
+
+id
+
+eventType
+
+previousHash
+
+eventHash
+
+timestamp
+
+actor
+
+payloadReference
+
+modelVersion
+
+11A. CommunityReport
+
+A CommunityReport shall preserve: source/provenance, reporter reference where permitted, hazard type, media object references, GeoJSON location, capture/submission timestamps, geolocation accuracy, nearby slope/road/asset associations, verification state, confidence/evidence references, duplicate cluster ID where applicable, moderation state, and audit history.
+
+11B. CommunityEventCluster
+
+A CommunityEventCluster groups spatially/temporally related public observations while retaining each source report as an independent record. It shall support report count, independent contributor count, verification summary, centroid/impact geometry, and linked operational event where created.
+
+12. Success Metrics
+
+Product metrics:
+
+percentage of risk events with actionable recommendations;
+
+percentage of actions acknowledged;
+
+median acknowledgement time;
+
+percentage of actions completed;
+
+number of unresolved critical events;
+
+data freshness compliance;
+
+offline sync success rate.
+
+Model metrics:
+
+probability of detection;
+
+false-alarm ratio;
+
+calibration;
+
+lead-time distribution;
+
+missed-event rate.
+
+Operational impact:
+
+isolation-hours avoided;
+
+critical facilities protected;
+
+response time reduction;
+
+pre-positioning effectiveness.
+
+13. MVP-to-Production Priorities
+
+P0
+
+Command Center
+
+RBAC
+
+MongoDB data model
+
+operational map
+
+slope units
+
+risk engine V1
+
+uncertainty
+
+action queue
+
+lifeline graph
+
+consequence engine
+
+authorization
+
+Warning Ledger
+
+offline field basics
+
+P1
+
+Slope-Change Radar
+
+Creep Watch
+
+alerts
+
+multilingual workflow
+
+citizen reporting
+
+sensor operations
+
+scenario simulation
+
+P2 / Research roadmap
+
+advanced spatiotemporal graph models;
+
+physics-informed time-to-failure;
+
+conformal calibration improvements;
+
+foundation-model transfer;
+
+information-gain sensor placement;
+
+distributed acoustic sensing.
+
+14. Competitive/Novelty Guardrails
+
+Do not claim as unique merely because Sentinel NER combines known technologies such as:
+
+rainfall thresholds;
+
+susceptibility mapping;
+
+IoT sensors;
+
+satellite monitoring;
+
+generic evacuation routing;
+
+generic ML prediction;
+
+generic cell-broadcast messaging.
+
+The product's differentiation should emphasize the integrated operational chain:
+
+change → risk → consequence → responsible actor → deadline → authorized action → outcome → audit/learning
+
+with NER-specific lifeline analysis, degraded-connectivity operation, and separate forecast/interception workflows.
+
+15. Release Criteria
+
+A production release requires:
+
+passing automated test suite;
+
+security checks completed;
+
+database/index review completed;
+
+backup/restore test completed;
+
+observability enabled;
+
+deployment reproducible;
+
+rollback documented/tested;
+
+accessibility review completed;
+
+external integrations have explicit health/failure states;
+
+no fake operational data in production;
+
+model limitations documented;
+
+runbooks available.

@@ -1,0 +1,25 @@
+{
+  "name": "sentinel-ner-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sentinel NER — Operational Landslide Intelligence and Intervention Platform for Northeast India",
+  "scripts": {
+    "web:dev": "npm.cmd --prefix apps/web run dev",
+    "web:build": "npm.cmd --prefix apps/web run build",
+    "web:test": "npm.cmd --prefix apps/web run test",
+    "web:typecheck": "npm.cmd --prefix apps/web run typecheck",
+    "web:lint": "npm.cmd --prefix apps/web run lint",
+    "api:test": "python -m pytest apps/api/tests -v",
+    "scan:secrets": "python scripts/scan_secrets.py",
+    "verify:stage1": "powershell -ExecutionPolicy Bypass -File scripts/verify_stage1.ps1"
+  },
+  "keywords": [
+    "landslide",
+    "early-warning",
+    "northeast-india",
+    "geospatial",
+    "disaster-management"
+  ],
+  "author": "Sentinel NER Engineering Team",
+  "license": "Proprietary"
+}
