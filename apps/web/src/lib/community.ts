@@ -215,3 +215,193 @@ export async function recalculateCommunityClusters(districtId: string): Promise<
   });
   return res.data;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STAGE 10: GEOFENCED PRONE AREA PROXIMITY & SMS ALERT SERVICE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface SMSAlertEnrollment {
+  phoneNumber: string;
+  recipientName?: string;
+  preferredLanguage: 'en' | 'hi' | 'mizo';
+  districtId?: string;
+  isActive: boolean;
+  enrolledAt: string;
+  lastNotifiedAt?: string;
+}
+
+export interface ProneAreaZone {
+  id: string;
+  name: string;
+  corridorName: string;
+  districtId: string;
+  state: string;
+  center: [number, number]; // [lat, lng]
+  dangerRadiusMeters: number; // e.g. 500m (Red Zone)
+  warningRadiusMeters: number; // e.g. 2500m (Advisory Zone)
+  riskLevel: 'CRITICAL' | 'HIGH' | 'MODERATE';
+  hazardType: ReportCategory;
+  currentSituation: string; // What is currently happening in the affected prone area
+  roadStatus: string;
+  recommendedAction: string;
+  activeSince: string;
+}
+
+export interface SMSAlertMessage {
+  id: string;
+  proneAreaId: string;
+  proneAreaName: string;
+  recipientPhone: string;
+  senderId: string;
+  messageText: string;
+  riskLevel: 'CRITICAL' | 'HIGH' | 'MODERATE';
+  distanceMeters: number;
+  dispatchedAt: string;
+  acknowledged?: boolean;
+}
+
+/** Authoritative Northeast Landslide Prone Areas & Corridors */
+export const PRONE_AREAS_NER: ProneAreaZone[] = [
+  {
+    id: 'zone-durtlang-01',
+    name: 'Durtlang Ridge Corridor',
+    corridorName: 'NH-54 km 44.2 (North Bend)',
+    districtId: 'dst-aizawl',
+    state: 'Mizoram',
+    center: [23.7548, 92.7214],
+    dangerRadiusMeters: 600,
+    warningRadiusMeters: 2500,
+    riskLevel: 'HIGH',
+    hazardType: 'LANDSLIDE',
+    currentSituation: 'Active scarp slip & progressive clay detachment. Approx 15cm road surface displacement with continuous rubble fall across northbound lane.',
+    roadStatus: 'SINGLE LANE CONVOY ONLY • HEAVY TRUCKS DIVERTED',
+    recommendedAction: 'Reduce speed to 15 km/h. Keep clear of cliff toe. Follow PWD / BRO Pushpak flaggers or divert via Sairang.',
+    activeSince: '2026-09-08T06:30:00Z',
+  },
+  {
+    id: 'zone-ranipool-02',
+    name: 'Ranipool – Singtam Corridor',
+    corridorName: 'NH-10 Himalayan Sector',
+    districtId: 'dst-east-sikkim',
+    state: 'Sikkim',
+    center: [27.3389, 88.6138],
+    dangerRadiusMeters: 750,
+    warningRadiusMeters: 3000,
+    riskLevel: 'CRITICAL',
+    hazardType: 'ROCKFALL',
+    currentSituation: 'Recurring boulder detachments from vertical gneissic cut slope above highway. High rainfall triggering rapid mudwash.',
+    roadStatus: 'INTERMITTENT BLOCKAGE • ESCORTED TRANSIT',
+    recommendedAction: 'Do not stop vehicles in rockfall chute zone. Evacuate roadside huts. Emergency machinery deployed by BRO Swastik.',
+    activeSince: '2026-09-08T11:15:00Z',
+  },
+  {
+    id: 'zone-ramhlun-03',
+    name: 'Ramhlun North Tension Ridge',
+    corridorName: 'Ramhlun Residential Spur',
+    districtId: 'dst-aizawl',
+    state: 'Mizoram',
+    center: [23.7489, 92.7301],
+    dangerRadiusMeters: 450,
+    warningRadiusMeters: 2000,
+    riskLevel: 'MODERATE',
+    hazardType: 'CRACKING',
+    currentSituation: 'Longitudinal tension cracks expanding across residential retaining wall and roadway following 65mm precipitation.',
+    roadStatus: 'CAUTION ADVISORY • LIGHT VEHICLES ONLY',
+    recommendedAction: 'Monitor building foundation cracks. Divert heavy axle loads. Report widening to Disaster Volunteer network.',
+    activeSince: '2026-09-09T03:00:00Z',
+  },
+  {
+    id: 'zone-bilkhawthlir-04',
+    name: 'Bilkhawthlir Lowland Corridor',
+    corridorName: 'NH-306 Valley Spur',
+    districtId: 'dst-kolasib',
+    state: 'Mizoram',
+    center: [24.1628, 92.6845],
+    dangerRadiusMeters: 500,
+    warningRadiusMeters: 2200,
+    riskLevel: 'HIGH',
+    hazardType: 'WATER_SEEPAGE',
+    currentSituation: 'Sudden high-volume turbid spring emergence at slope toe with active soil liquefaction and drainage ditch overflow.',
+    roadStatus: 'FLOODED SLOPES • WATERLOGGED EMBANKMENT',
+    recommendedAction: 'Avoid driving through muddy slope runoff. Watch for sudden road drop. PWD drainage team on site.',
+    activeSince: '2026-09-08T18:45:00Z',
+  },
+  {
+    id: 'zone-zote-05',
+    name: 'Zote Access Corridor',
+    corridorName: 'Champhai Bypass km 12',
+    districtId: 'dst-champhai',
+    state: 'Mizoram',
+    center: [23.4721, 93.3289],
+    dangerRadiusMeters: 400,
+    warningRadiusMeters: 2000,
+    riskLevel: 'MODERATE',
+    hazardType: 'ROAD_DAMAGE',
+    currentSituation: 'Step-settlement of 18cm along road foundation with shear slip cracks extending into agricultural terraces.',
+    roadStatus: 'SLOW TRANSIT (MAX 10 KM/H)',
+    recommendedAction: 'Follow flaggers. Avoid parking on outer embankment shoulder.',
+    activeSince: '2026-09-09T05:20:00Z',
+  },
+];
+
+/**
+ * Calculates geodesic distance between two [latitude, longitude] coordinates using Haversine formula.
+ * Returns distance in meters.
+ */
+export function calculateDistanceMeters(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  const R = 6371000; // Earth radius in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c);
+}
+
+/**
+ * Formats standard Government Common Alerting Protocol (CAP) emergency SMS payload.
+ */
+export function generateProneAreaSMS(
+  zone: ProneAreaZone,
+  phone: string,
+  distanceMeters: number
+): SMSAlertMessage {
+  const isInsideDanger = distanceMeters <= zone.dangerRadiusMeters;
+  const distText =
+    distanceMeters < 1000 ? `${distanceMeters}m` : `${(distanceMeters / 1000).toFixed(1)}km`;
+
+  const urgencyTag = isInsideDanger
+    ? 'CRITICAL RED ALERT • IMMEDIATE DANGER'
+    : 'PROXIMITY WARNING • HAZARD ZONE APPROACH';
+
+  const messageText = `[GOI-NDMA / NLEWS EMERGENCY SMS ALERT]
+URGENCY: ${urgencyTag}
+LOCATION: ${zone.name} (${zone.corridorName}, ${zone.state})
+PROXIMITY: You are currently ${distText} from the affected active landslide prone zone.
+WHAT IS HAPPENING: ${zone.currentSituation}
+ROAD STATUS: ${zone.roadStatus}
+ACTION REQUIRED: ${zone.recommendedAction}
+EMERGENCY HELPLINE: 1078 (NDMA Toll-Free 24/7) • Ref: CAP-NER-${zone.id.toUpperCase()}-${Date.now().toString().slice(-4)}`;
+
+  return {
+    id: `sms-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    proneAreaId: zone.id,
+    proneAreaName: zone.name,
+    recipientPhone: phone,
+    senderId: 'GOI-NDMA',
+    messageText,
+    riskLevel: zone.riskLevel,
+    distanceMeters,
+    dispatchedAt: new Date().toISOString(),
+    acknowledged: false,
+  };
+}

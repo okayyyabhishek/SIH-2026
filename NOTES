@@ -1,0 +1,698 @@
+# 🏛️ Sentinel NER — Complete SIH 2026 Deep Dive & Competition Preparation Guide
+
+> **For: All Team Members**
+> **Purpose: Understand every detail of the project for Smart India Hackathon 2026**
+> **Role: Expert Teacher, SIH Judge Perspective, and Technical Mentor**
+
+---
+
+## 📋 Table of Contents
+
+1. [What Is Sentinel NER? (The 30-Second Pitch)](#1-the-pitch)
+2. [Why This Problem Matters — The Real-World Context](#2-problem-context)
+3. [The Core Innovation — What Makes This Different](#3-core-innovation)
+4. [Architecture Overview — The 10-Stage Pipeline](#4-architecture)
+5. [Stage-by-Stage Deep Dive](#5-stage-deep-dive)
+6. [Tech Stack Breakdown](#6-tech-stack)
+7. [Codebase Walkthrough](#7-codebase)
+8. [Key Design Decisions a Judge Will Ask About](#8-judge-questions)
+9. [Security Architecture — Why This Matters for SIH](#9-security)
+10. [Testing & Quality — Your Competitive Edge](#10-testing)
+11. [What Each Team Member Should Know](#11-team-roles)
+12. [Potential Judge Questions & Model Answers](#12-qa)
+13. [Competition Strategy & Presentation Tips](#13-strategy)
+
+---
+
+## 1. The Pitch {#1-the-pitch}
+
+> [!IMPORTANT]
+> **Memorize this.** Every teammate should be able to deliver this in 30 seconds.
+
+**Sentinel NER** is an **operational landslide intelligence and intervention platform** for Northeast India. It doesn't just *predict* landslides — it converts hazard intelligence into **accountable, time-bound operational decisions** for people, infrastructure, and emergency agencies.
+
+### The Magic Formula:
+```
+Detect → Predict → Understand Consequences → Decide → Act → Verify → Learn
+```
+
+### One-Line Differentiator:
+> *"Existing systems can tell you a landslide might happen. Sentinel NER tells you **which road chainage** is at risk, **which villages** could become isolated, **who** needs to act, **what** they should do, and **by when** — then tracks whether they actually did it."*
+
+---
+
+## 2. Why This Problem Matters {#2-problem-context}
+
+### The Operational Gap (This is what SIH judges care about)
+
+India has:
+- **GSI/NLFC**: National Landslide Forecast Centre — provides susceptibility maps
+- **IMD**: India Meteorological Department — provides rainfall forecasts
+- **ISRO/NRSC**: Indian Space Research Organisation — provides satellite imagery
+- **NDMA**: National Disaster Management Authority — provides guidelines
+
+> [!CAUTION]
+> **The gap is NOT in detection. The gap is in OPERATIONS.**
+
+Currently, when IMD says "heavy rainfall expected" and GSI says "this area is susceptible":
+- ❌ Nobody knows which **specific slope** is most dangerous right now
+- ❌ Nobody knows which **road chainage (kilometer marker)** will be blocked
+- ❌ Nobody knows which **villages will become isolated** if that road is cut
+- ❌ Nobody knows **who exactly** should inspect, close, or reroute
+- ❌ Nobody tracks whether the recommended action was **actually done**
+- ❌ There's no **audit trail** linking prediction → action → outcome
+
+**Sentinel NER fills this entire chain.**
+
+### Target Region: Northeast India
+- **Primary corridors**: Mizoram (NH-54, NH-306), Assam, Sikkim, Meghalaya, Arunachal Pradesh
+- **Why NER?**: Highest landslide density in India, fragile terrain, limited road connectivity, single-road-dependency for entire districts
+- **Real impact**: When NH-54 between Aizawl and Lunglei is blocked, 500,000+ people lose their only supply route
+
+---
+
+## 3. The Core Innovation {#3-core-innovation}
+
+> [!TIP]
+> **What makes this different from every other "landslide prediction system"** — this is what wins competitions.
+
+### 3.1 We Are NOT Claiming:
+Read the [PRD Section 14](file:///c:/Users/Abhishek/SIH%20-%202026/.prd/ner_prd) — **Competitive/Novelty Guardrails**:
+
+We do NOT claim uniqueness for:
+- Rainfall thresholds (every system does this)
+- Susceptibility mapping (GSI already does this)
+- IoT sensors (many projects claim this)
+- Satellite monitoring (ISRO already does this)
+- Generic ML prediction (hundreds of papers exist)
+- Generic evacuation routing (Google Maps does this)
+
+### 3.2 What We ARE Claiming:
+Our differentiation is the **integrated operational chain**:
+
+```mermaid
+graph LR
+    A[Environmental Change] --> B[Slope-Level Risk]
+    B --> C[Road & Asset Consequence]
+    C --> D[Responsible Actor]
+    D --> E[Time-Bound Deadline]
+    E --> F[Authorized Action]
+    F --> G[Verified Outcome]
+    G --> H[Audit & Learning]
+```
+
+Plus these NER-specific innovations:
+1. **Lifeline Graph Analysis**: Roads as a network graph — when one edge fails, calculate isolation impact
+2. **Forecast vs. Interception Mode**: Different operational profiles for slow-onset (days of warning) vs. rapid (hours/minutes) events
+3. **Degraded Connectivity Operations**: The system works even when network is down (offline field app)
+4. **Strict Non-Autonomous Boundary**: AI recommends; authorized humans approve — this is *by design*, not a limitation
+5. **Warning Ledger**: Cryptographic, append-only audit trail of every prediction → action → outcome
+
+---
+
+## 4. Architecture Overview — The 10-Stage Pipeline {#4-architecture}
+
+> [!IMPORTANT]
+> **Every teammate must understand this pipeline.** Judges will walk you through it.
+
+```mermaid
+graph TB
+    S1[Stage 1: Foundation<br/>FastAPI + Next.js + CI/CD] --> S2[Stage 2: Security & RBAC<br/>JWT, Roles, Audit]
+    S2 --> S3[Stage 3: Domain Data & Geospatial<br/>Districts, Slopes, Roads, Villages, Assets]
+    S3 --> S4[Stage 4: Operational Map<br/>Leaflet, Layers, Spatial Queries]
+    S4 --> S5[Stage 5: Risk Engine<br/>Transparent ML, Calibration, Provenance]
+    S5 --> S6[Stage 6: Satellite & InSAR<br/>Change Detection, Deformation]
+    S6 --> S7[Stage 7: Consequence Engine<br/>Road/Asset/Village Impact Graph]
+    S7 --> S8[Stage 8: Operational Control<br/>Actions, Warnings, Ledger]
+    S8 --> S9[Stage 9: Alerts & Connectivity<br/>Multi-Channel Delivery, Offline Mode]
+    S9 --> S10[Stage 10: Community Intelligence<br/>Citizen Reports, Field Sensors]
+```
+
+### Why Stages Matter:
+Each stage builds on the previous one. This is a **disciplined engineering approach**, not a hackathon mess. Judges love seeing:
+- Clear separation of concerns
+- Each stage independently testable
+- Stage-gate verification scripts for every stage
+
+---
+
+## 5. Stage-by-Stage Deep Dive {#5-stage-deep-dive}
+
+### Stage 1: Foundation Infrastructure
+**Files**: [main.py](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/main.py), [ci.yml](file:///c:/Users/Abhishek/SIH%20-%202026/.github/workflows/ci.yml)
+
+What was built:
+- FastAPI application factory pattern with proper lifespan management
+- Next.js App Router with TypeScript
+- GitHub Actions CI pipeline (secret scanning, backend tests, frontend lint/typecheck/tests)
+- Docker Compose for local dev (API + Web + MongoDB + Redis)
+- Structured JSON logging with correlation IDs
+
+**Why it matters**: This is production-grade scaffolding. Most hackathon projects skip this entirely.
+
+---
+
+### Stage 2: Security & RBAC Architecture
+**Files**: [rbac.py](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/core/security/rbac.py), [jwt.py](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/core/security/jwt.py), [auth.py](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/api/v1/auth.py)
+
+**7 Distinct Roles** (know all of them):
+
+| Role | Who They Are | What They Can Do |
+|------|-------------|-----------------|
+| `PLATFORM_ADMIN` | System administrator | Everything — global scope |
+| `STATE_AUTHORITY` | State disaster management | State-wide operations |
+| `DDMA` | District Disaster Management Authority | District-scoped operations + authorization |
+| `PWD` / `BRO` / `NHIDCL` | Public Works, Border Roads, Highways | Road/asset-scoped operations |
+| `FIELD_OFFICER` | On-ground personnel | Limited read + field reporting |
+| `CITIZEN_REPORTER` | General public | Submit reports only |
+| `OBSERVER_AUDITOR` | Read-only oversight | Audit trail access |
+
+**Key Security Features**:
+- JWT token authentication with RS256/HS256
+- BOLA (Broken Object Level Authorization) defense — you can't access another district's data
+- Mass assignment protection — server derives all privileged fields
+- Rate limiting per role
+- Correlation IDs for request tracing
+
+---
+
+### Stage 3: Domain Data & Geospatial Foundation
+**Files**: [domain.py (schemas)](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/schemas/domain.py), [geojson.py](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/schemas/geojson.py), [repository.py](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/db/repository.py)
+
+**7 Authoritative Domain Entities** (memorize these):
+
+| Entity | What It Is | Geometry Type |
+|--------|-----------|---------------|
+| **District** | Administrative governance boundary | MultiPolygon |
+| **SlopeUnit** | Hydrologically-bounded terrain management unit | Polygon |
+| **Road** | Transportation artery (NH/SH/MDR/Border Road) | LineString |
+| **RoadChainage** | Kilometer marker reference post along a road | Point |
+| **Village** | Habitation settlement with population data | Point |
+| **Asset** | Critical infrastructure (bridges, hospitals, water supplies) | Point/Polygon |
+| **LandslideEvent** | Historical/observed landslide occurrence | Point/Polygon |
+
+**Technical Highlights**:
+- All coordinates in **EPSG:4326** (WGS84, [Longitude, Latitude])
+- Strict GeoJSON validation (coordinate bounds, ring closure, payload < 2MB)
+- MongoDB with `2dsphere` spatial indexes on every geometry field
+- Compound indexes optimized for operational queries
+
+---
+
+### Stage 4: Operational Geospatial Map
+**Files**: [map/page.tsx](file:///c:/Users/Abhishek/SIH%20-%202026/apps/web/src/app/map/page.tsx)
+
+- **Engine**: Leaflet (dynamically imported, SSR disabled)
+- **Basemap**: OpenStreetMap with tactical dark-mode filtering (zero proprietary API keys!)
+- **Default View**: Centered on Northeast India `[23.73, 92.72]`, Zoom 11
+- **7 toggleable layers** with distinct symbology:
+  - Districts (Indigo), Slope Units (Emerald), Roads (Blue), Chainages (Cyan), Villages (Amber), Assets (Violet), Landslide Events (Orange)
+- **3 Spatial Query Modes**:
+  1. Overview/Viewport mode — bounded reads
+  2. Nearby Proximity mode — interactive radius slider (up to 50 km)
+  3. Point Query mode — click to find intersecting geometries
+- **WCAG 2.2 AA**: Accessible data roster with keyboard navigation
+
+---
+
+### Stage 5: Transparent Risk Engine ⭐
+**Files**: [risk/ module](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/core/risk), [stage5 architecture](file:///c:/Users/Abhishek/SIH%20-%202026/docs/stage5_risk_engine_architecture.md)
+
+> [!IMPORTANT]
+> **This is the intellectual core of the project.** Every judge will probe here.
+
+**5 Authoritative Features (Schema v1.0.0)**:
+
+| Feature | Unit | Range | Source |
+|---------|------|-------|--------|
+| `rainfall_accumulated_24h` | mm | [0, 1000] | IMD / IoT sensors |
+| `rainfall_accumulated_72h` | mm | [0, 2500] | IMD |
+| `slope_angle_degrees` | degrees | [0, 90] | CartoDEM/SRTM |
+| `historical_landslide_count_5yr` | count | [0, 100] | GSI inventory |
+| `road_cut_height_meters` | meters | [0, 100] | Field survey |
+
+**Model Architecture**:
+- **Algorithm**: `TransparentLogisticRegression` — zero external dependencies, pure Python
+- **Why not deep learning?** Because:
+  1. Logistic regression is *fully explainable* — you can show exactly which feature contributed how much
+  2. Zero opaque C-extensions = no security vulnerabilities from pickle deserialization
+  3. Linear log-odds decomposition = every prediction is auditable
+  4. SIH judges want to see you *understand* your model, not just use a black box
+
+**Calibration**: Platt Scaling
+$$P(\text{Risk} \mid z) = \frac{1}{1 + \exp(A \cdot z + B)}$$
+
+Without calibration, raw model scores ≠ real probabilities. This is something 99% of hackathon projects get wrong.
+
+**Feature Provenance**:
+- **Cryptographic Snapshotting**: Inputs captured in immutable `RiskFeatureSnapshot` with SHA-256 digest
+- **Quality States**: `VALID`, `PARTIAL`, `STALE`, `OUT_OF_RANGE`, `DATA_INSUFFICIENT`
+- **Refusal Policy**: If ≥3 features are missing → engine REFUSES to predict (outputs `DATA_INSUFFICIENT` instead of guessing)
+
+**Leakage Prevention**:
+- **Temporal**: max(T_train) < min(T_val) < min(T_test) — strictly enforced
+- **Spatial**: Cross-district separation — no training on Aizawl slopes, validating on Aizawl slopes
+
+**Artifact Security**:
+- Model weights stored as JSON (NOT pickle!)
+- SHA-256 checksum verification before loading
+- Lifecycle state machine: `DRAFT → VALIDATING → VALIDATED → APPROVED → ACTIVE → RETIRED`
+
+---
+
+### Stage 6: Satellite & InSAR Change Intelligence ⭐
+**Files**: [satellite/ module](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/core/satellite), [stage6 architecture](file:///c:/Users/Abhishek/SIH%20-%202026/docs/stage6_satellite_insar_architecture.md)
+
+**What InSAR Does**:
+Interferometric Synthetic Aperture Radar measures ground surface displacement:
+$$\Delta R_{\text{LOS}} = -\frac{\lambda}{4\pi} \Delta \phi_{\text{diff}}$$
+
+Key insight: InSAR measures **Line-of-Sight displacement**, NOT vertical displacement. This distinction is *critical*.
+
+**Data Pipeline**:
+```
+Satellite SLC Scene → Data Validation → Preprocessing → 
+Co-registration → Differential Phase → LOS Displacement → 
+Quality Assessment (Coherence γ) → Provenance Tagging → 
+Stage 5 Feature Ingestion
+```
+
+**Security Defenses** (5 layers):
+1. **SSRF Protection**: URL allowlist (only Copernicus, AWS Element84, Planetary Computer)
+2. **ZipSlip Defense**: Path traversal rejection, symlink blocking, decompression ratio limits
+3. **Raster Safety**: Pure-Python GeoTIFF parser (no GDAL dependency attack surface)
+4. **Object Storage Traversal Defense**: SHA-256 hash-on-write, verify-on-read
+5. **RBAC**: No citizen access to satellite endpoints
+
+**Anti-Fabrication Policy**: If real satellite data is unavailable, the system NEVER fabricates data. Test fixtures are explicitly tagged as `DETERMINISTIC_TEST_FIXTURE`.
+
+---
+
+### Stage 7: Road & Asset Consequence Intelligence ⭐
+**Files**: [consequence/ module](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/core/consequence), [stage7 architecture](file:///c:/Users/Abhishek/SIH%20-%202026/docs/stage7_consequence_architecture.md)
+
+This stage answers: **"If this slope fails, what is the operational impact?"**
+
+**Consequence Graph** (5 relationship types):
+
+| Relationship | Spatial Rule | Example |
+|-------------|-------------|---------|
+| SlopeUnit → Road | INTERSECTS (0m) or NEARBY (≤500m) | "Slope SU-042 intersects NH-54 at km 142" |
+| Road → RoadChainage | Parent-child | "NH-54 chainage km 142.0 through 143.5" |
+| SlopeUnit → Village | CONTAINS, OVERLAPS, or NEARBY (≤2km) | "Village Hnahthial is 1.3km from affected slope" |
+| SlopeUnit → Asset | WITHIN or NEARBY (≤1km) | "Tuirial Bridge is 400m from affected slope" |
+| RiskPrediction → Exposed Entity | Stage 5 risk level linkage | "HIGH risk slope exposes NH-54" |
+
+**Language Safety** (extremely important):
+- ✅ "SPATIALLY EXPOSED" — never ❌ "UNSAFE"
+- ✅ "POTENTIALLY AFFECTED" — never ❌ "ROAD IS CLOSED"
+- ✅ "NEARBY" — never ❌ "EVACUATE IMMEDIATELY"
+
+**Three-Way Separation** (judges will test this):
+
+| Dimension | Source | Meaning |
+|-----------|--------|---------|
+| **Risk** | Stage 5 (ML model) | "How likely is a hazard event?" |
+| **Criticality** | Stage 3 (authoritative metadata) | "How important is this facility?" |
+| **Consequence** | Stage 7 (spatial analysis) | "What would be impacted if it happens?" |
+
+These are NEVER multiplied into a single "danger score". That's an anti-pattern.
+
+---
+
+### Stage 8: Human-Authorized Operational Control ⭐⭐
+**Files**: [operations/ module](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/core/operations), [stage8 architecture](file:///c:/Users/Abhishek/SIH%20-%202026/docs/stage8_operational_control_architecture.md)
+
+> [!CAUTION]
+> **This is the moral and legal heart of the project.** The system NEVER autonomously issues warnings, closures, or evacuations.
+
+**Action Lifecycle State Machine**:
+```
+RECOMMENDED → PENDING_REVIEW → APPROVED/REJECTED → QUEUED → IN_PROGRESS → COMPLETED
+```
+
+**Warning Workflow**:
+```
+DRAFT → REVIEW → AUTHORIZED → DISPATCHING → DISPATCHED → ACKNOWLEDGED → RESOLVED
+```
+
+**13 Granular Permissions** — from `ACTION_READ` through `LEDGER_VERIFY`
+
+**Warning Ledger**: 
+- Append-only, cryptographic hash chain
+- Every entry: `event_type + previous_hash + event_hash + timestamp + actor + payload`
+- Provides tamper-evident audit trail: prediction → recommendation → authorization → dispatch → outcome
+
+**Non-Autonomous Safety Principle** (memorize this):
+```
+❌ Risk Prediction ──X──> Automatic Public Warning
+❌ Satellite Creep Watch ──X──> Automatic Road Closure  
+❌ Consequence Analysis ──X──> Automatic Settlement Evacuation
+❌ Hazard Index Spike ──X──> Automatic Field Crew Dispatch
+```
+
+---
+
+### Stage 9: Alerts, Notification Delivery & Degraded Connectivity
+**Files**: [delivery_engine.py](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/core/operations/delivery_engine.py), [notifications.py](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/core/operations/notifications.py)
+
+**Multi-Channel Delivery**:
+- SMS, Email, Push Notification, Web Notification, VHF Radio Relay
+
+**Truthful Delivery States**:
+```
+REQUESTED → SENDING → ACCEPTED_BY_PROVIDER → DELIVERED → ACKNOWLEDGED
+```
+
+Key distinctions:
+- `ACCEPTED_BY_PROVIDER ≠ DELIVERED` (AWS SNS accepted ≠ phone received)
+- `DELIVERED ≠ ACKNOWLEDGED` (phone received ≠ human read and understood)
+- `SIMULATED` explicitly marked in dev/test (never disguised as real)
+
+**Bounded Escalation**: Max 3 escalation levels (prevents notification storms)
+
+---
+
+### Stage 10: Community Intelligence & Field Sensors
+**Files**: [community.py (schemas)](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/schemas/community.py), [sensors.py (API)](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/api/v1/sensors.py)
+
+**Community Reports Workflow**:
+```
+SUBMITTED → PROCESSING → PROBABLE/VERIFIED/UNVERIFIED → ACTIONED → RESOLVED/REJECTED
+```
+
+**Verification evidence fusion**: Media analysis + location consistency + rainfall data + existing risk + satellite evidence + nearby independent reports
+
+**Guard rails**: Rate limiting, duplicate detection, moderation, suspicious-report handling, privacy-aware identity
+
+---
+
+## 6. Tech Stack Breakdown {#6-tech-stack}
+
+### Backend
+
+| Technology | Purpose | Why This Choice |
+|-----------|---------|----------------|
+| **Python 3.11+** | Backend language | Geospatial ecosystem (Shapely, GeoPandas), ML ecosystem |
+| **FastAPI** | Web framework | Async, automatic OpenAPI docs, Pydantic integration |
+| **Pydantic v2** | Data validation | Type-safe schemas, serialization, config management |
+| **MongoDB Atlas** | Primary database | GeoJSON native support, `2dsphere` indexes, flexible schema |
+| **Redis** | Caching & rate limiting | Fast in-memory store |
+| **Celery** | Background tasks | Async processing for satellite/risk pipelines |
+| **JWT (PyJWT)** | Authentication | Stateless tokens, role embedding |
+
+### Frontend
+
+| Technology | Purpose | Why This Choice |
+|-----------|---------|----------------|
+| **Next.js (App Router)** | Framework | SSR, file-based routing, TypeScript-first |
+| **React 18** | UI library | Component model, concurrent features |
+| **TypeScript** | Language | Type safety across API contracts |
+| **Tailwind CSS** | Styling | Utility-first, responsive, dark mode |
+| **Leaflet** | Map engine | Open source, zero API keys, lightweight |
+| **TanStack Query** | Data fetching | Caching, background refetch, optimistic updates |
+| **Zustand** | State management | Minimal, TypeScript-friendly |
+| **Lucide React** | Icons | Consistent, accessible SVG icons |
+
+### Infrastructure
+
+| Technology | Purpose |
+|-----------|---------|
+| **Docker** | Containerization |
+| **GitHub Actions** | CI/CD pipeline |
+| **AWS S3** | Object storage (satellite data) |
+| **MongoDB Atlas** | Managed database |
+
+---
+
+## 7. Codebase Walkthrough {#7-codebase}
+
+### Repository Structure Map
+
+```
+SIH - 2026/
+├── .github/workflows/ci.yml       # CI pipeline (3 jobs: security, backend, frontend)
+├── .prd/ner_prd                    # Product Requirements Document (966 lines!)
+├── docs/                           # 10 architecture documents
+│   ├── stage5_risk_engine_architecture.md
+│   ├── stage6_satellite_insar_architecture.md
+│   ├── stage7_consequence_architecture.md
+│   ├── stage8_operational_control_architecture.md
+│   └── ... (risk feature dictionary, InSAR spec, etc.)
+├── apps/
+│   ├── api/                        # Python FastAPI Backend
+│   │   ├── src/
+│   │   │   ├── main.py            # Application factory (237 lines)
+│   │   │   ├── api/v1/            # 27 route modules!
+│   │   │   │   ├── router.py      # Mounts all routers by stage
+│   │   │   │   ├── health.py      # Health check endpoints
+│   │   │   │   ├── auth.py        # JWT login/register/token refresh
+│   │   │   │   ├── risk.py        # Risk prediction endpoints
+│   │   │   │   ├── satellite.py   # STAC ingestion, InSAR processing
+│   │   │   │   ├── consequences.py # Impact analysis endpoints
+│   │   │   │   ├── warnings.py    # Warning lifecycle endpoints
+│   │   │   │   ├── actions.py     # Action recommendation endpoints
+│   │   │   │   └── ... (20+ more)
+│   │   │   ├── core/
+│   │   │   │   ├── config.py      # Pydantic Settings (209 lines)
+│   │   │   │   ├── security/      # JWT, RBAC, crypto, rate limiter
+│   │   │   │   ├── risk/          # ML pipeline, features, registry
+│   │   │   │   ├── consequence/   # Consequence graph engine
+│   │   │   │   ├── satellite/     # STAC provider, InSAR pipeline
+│   │   │   │   ├── operations/    # Actions, warnings, ledger
+│   │   │   │   └── community/     # Citizen reports engine
+│   │   │   ├── schemas/           # 16 Pydantic schema modules
+│   │   │   └── db/                # MongoDB connection + repository
+│   │   └── tests/                 # 37 test files!
+│   └── web/                       # Next.js Frontend
+│       ├── src/
+│       │   ├── app/               # 17 route directories
+│       │   │   ├── page.tsx       # Command Center homepage
+│       │   │   ├── map/           # Operational geospatial map
+│       │   │   ├── risk/          # Risk assessment dashboard
+│       │   │   ├── operations/    # Action & warning control center
+│       │   │   ├── community/     # Citizen reporting interface
+│       │   │   └── ... (sensors, alerts, lifelines, etc.)
+│       │   ├── components/        # Reusable UI components
+│       │   └── lib/               # 16 library modules (API clients, i18n, etc.)
+│       └── tests/                 # Vitest + Playwright tests
+├── docker/                        # Dockerfiles + docker-compose.yml
+└── scripts/                       # 15 verification scripts (scan, stage gates)
+```
+
+### Code Metrics at a Glance
+
+| Metric | Count |
+|--------|-------|
+| Backend route modules | 27 |
+| Backend schema modules | 16 |
+| Backend test files | 37 |
+| Frontend pages/routes | 17 |
+| Frontend library modules | 16 |
+| Architecture documents | 10 |
+| Stage verification scripts | 15 |
+| Docker services | 4 (API, Web, MongoDB, Redis) |
+| API endpoints | 50+ |
+| RBAC permissions | 20+ |
+
+---
+
+## 8. Key Design Decisions a Judge Will Ask About {#8-judge-questions}
+
+### "Why logistic regression instead of deep learning?"
+
+**Answer**: 
+> *"We deliberately chose transparent logistic regression for three reasons:*
+> 1. *Full explainability — we can decompose every prediction into feature contributions with exact weights*
+> 2. *Operational trust — incident commanders need to understand WHY the system recommends an action, not just WHAT*
+> 3. *Artifact security — no pickle deserialization vulnerabilities, pure JSON weights with SHA-256 integrity checks*
+> *Deep learning would give us a marginally better AUC but make the system an opaque black box. In disaster management, trust > accuracy."*
+
+### "Why not automate the warnings?"
+
+**Answer**:
+> *"This is a deliberate design choice, not a limitation. Under NDMA guidelines, public emergency warnings require authorized human approval. Our system is designed to SUPPORT decisions, not MAKE them. The entire Stage 8 architecture enforces: Evidence → Recommendation → Technical Review → Human Authorization → Dispatch → Acknowledgement → Outcome Verification. Every step is auditable in the Warning Ledger."*
+
+### "How do you handle when data is missing?"
+
+**Answer**:
+> *"We have a 5-state quality framework: VALID, PARTIAL, STALE, OUT_OF_RANGE, and DATA_INSUFFICIENT. If 3 or more essential features are missing, the engine enforces a Refusal Policy — it returns DATA_INSUFFICIENT instead of guessing. We never fabricate data or silently substitute defaults. Every data quality state is propagated through the entire pipeline and displayed to the user."*
+
+### "What about satellite data availability?"
+
+**Answer**:
+> *"We explicitly tag our operational status as 'ENGINEERING COMPLETE / NOT OPERATIONALLY VALIDATED'. All architecture, schemas, and security are production-ready, but we haven't validated against continuous live satellite downlinks yet. Test fixtures are tagged as DETERMINISTIC_TEST_FIXTURE and never disguised as live telemetry. This honesty is a feature, not a weakness."*
+
+---
+
+## 9. Security Architecture {#9-security}
+
+### Security Layers (7 Defenses)
+
+1. **Authentication**: JWT tokens (HS256 dev / RS256 prod)
+2. **Authorization (RBAC)**: 7 roles × 20+ permissions matrix
+3. **BOLA/IDOR Defense**: District-scoped access — can't access another district's data
+4. **Mass Assignment Defense**: Server derives all privileged fields (status, authorized_by, etc.)
+5. **Input Validation**: Pydantic v2 strict schemas, GeoJSON coordinate bounds
+6. **Rate Limiting**: Per-role, per-endpoint throttling
+7. **Secret Scanning**: Automated CI scan for leaked credentials
+8. **SSRF Protection**: URL allowlist for satellite endpoints
+9. **Anti-Pickle**: No Python pickle deserialization anywhere
+10. **Correlation IDs**: Every request tagged for tracing
+
+### Production Safety Invariants
+- `NOTIFICATION_PROVIDER=simulated` → **rejected** in production/staging
+- `ENABLE_DEV_FIXTURES=true` → **rejected** in production
+- Swagger docs → **disabled** in production
+- Debug mode → **disabled** in production
+
+---
+
+## 10. Testing & Quality {#10-testing}
+
+### 37 Test Files Covering:
+
+| Category | Test Files | What They Verify |
+|----------|-----------|-----------------|
+| Health & Errors | 2 | API health probes, error envelope format |
+| Auth & JWT | 3 | Token generation, validation, refresh, expiry |
+| RBAC & IDOR | 6 | Role-based access, district scoping, cross-tenant isolation |
+| Domain CRUD | 3 | All 7 entity types: create, read, update, list |
+| GeoJSON | 1 | Coordinate validation, ring closure, bounds |
+| Spatial Queries | 1 | Nearby, point-in-geometry, viewport |
+| Risk Engine | 4 | ML pipeline, feature extraction, calibration, leakage prevention |
+| Artifact Security | 1 | SHA-256 checksum, tamper rejection, JSON-only loading |
+| Satellite & InSAR | 4 | STAC ingestion, InSAR pipeline, SSRF defense |
+| Consequence Engine | 3 | Spatial relationships, graph construction, impact assessment |
+| Action & Warning | 4 | Lifecycle state machines, authorization flows |
+| Alerting & Connectivity | 1 | Multi-channel delivery, degraded mode |
+| Community & Sensors | 1 | Report submission, verification, sensor integration |
+| MongoDB Persistence | 1 | Connection handling, failover, degraded mode |
+| Hardening | 2 | Token security, pre-Stage 9 hardening |
+
+### Verification Scripts
+The `scripts/` directory contains **15 stage-gate verification scripts** — PowerShell and Python scripts that validate each stage's requirements are met before proceeding.
+
+---
+
+## 11. What Each Team Member Should Know {#11-team-roles}
+
+### For the **Backend/API Developer**:
+- Master the [FastAPI application factory](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/main.py) — lifespan, middleware, exception handlers
+- Know every route in [router.py](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/api/v1/router.py)
+- Understand the [repository pattern](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/db/repository.py) — in-memory fallback + MongoDB sync
+- Be able to explain the RBAC matrix cold
+
+### For the **Frontend Developer**:
+- Know all 17 pages and their purpose
+- Understand the [AppProviders](file:///c:/Users/Abhishek/SIH%20-%202026/apps/web/src/components/providers) setup — query client, auth context, theme
+- Be fluent in the [lib/ modules](file:///c:/Users/Abhishek/SIH%20-%202026/apps/web/src/lib) — API clients, type definitions, i18n
+- Know how the map works — Leaflet, layers, spatial query modes
+
+### For the **ML/Data Science Member**:
+- Deep understanding of [risk/ pipeline](file:///c:/Users/Abhishek/SIH%20-%202026/apps/api/src/core/risk) — features.py, models.py, pipeline.py, evaluation.py
+- Be able to explain logistic regression decomposition on a whiteboard
+- Know Platt Scaling and why raw model scores ≠ probabilities
+- Understand temporal/spatial leakage prevention
+- Know the feature dictionary inside out
+
+### For the **DevOps/Infrastructure Member**:
+- Docker Compose setup — can spin up the entire system locally
+- CI pipeline — understand all 3 jobs and their gates
+- MongoDB indexing strategy — why 2dsphere, compound indexes
+- Environment configuration — what changes between dev/staging/production
+
+### For the **Domain Expert/Presenter**:
+- The PRD — read it end to end ([ner_prd](file:///c:/Users/Abhishek/SIH%20-%202026/.prd/ner_prd))
+- All user journeys (A through E)
+- The problem statement and operational gap
+- Non-goals (what we are NOT building and why)
+- Language safety — prohibited vs. permitted phrasing
+
+### For **EVERYONE**:
+- The 30-second pitch
+- The 10-stage pipeline
+- The non-autonomous safety principle
+- The 7 domain entities
+- Risk vs. Criticality vs. Consequence distinction
+- At least 3 answers from the judge Q&A section
+
+---
+
+## 12. Potential Judge Questions & Model Answers {#12-qa}
+
+### Technical Depth Questions
+
+**Q: "How does your risk model handle concept drift?"**
+> *"Stage 5 includes a model lifecycle state machine (DRAFT → ACTIVE → RETIRED). When new validated event data becomes available, a new model version is trained on the updated inventory with strictly enforced temporal splits. The old model transitions to RETIRED while the new one goes through VALIDATING → VALIDATED → APPROVED → ACTIVE. Both versions coexist during transition with explicit version tracking in every prediction."*
+
+**Q: "What happens when MongoDB goes down?"**
+> *"In production/staging, MongoDB failure during startup is CRITICAL and halts the process. In development, the system starts in DEGRADED mode using an in-memory repository with seed data. During runtime, MongoDB connection failures return HTTP 503 with a structured error envelope containing the correlation ID, not a stack trace."*
+
+**Q: "How do you ensure spatial queries are performant?"**
+> *"Every geometry field has a MongoDB 2dsphere index. We use bounding box prefiltering before expensive intersection calculations. Candidate entity limits are capped at 500. Spatial query radiuses are clamped at 5000m for consequences and 50km for nearby searches."*
+
+### Product/Impact Questions
+
+**Q: "Who are your actual users?"**
+> *"DDMA (District Disaster Management Authority) for situation awareness and warning authorization. PWD/BRO/NHIDCL for chainage-specific hazard and road operations. Field officers for offline-capable inspections. State authorities for cross-district monitoring. Citizens for hazard reporting. Auditors for accountability."*
+
+**Q: "How is this different from NDMA's LEWS?"**
+> *"NDMA's LEWS provides national-scale rainfall-based susceptibility alerts. We consume that intelligence as INPUT and add the operational layer: specific slope risk, road chainage impact, village isolation analysis, role-specific actions with deadlines, authorization workflows, and outcome tracking. We're complementary, not competitive."*
+
+**Q: "What's the deployment model?"**
+> *"AWS for cloud infrastructure (S3 for satellite data, compute for API). MongoDB Atlas for managed database. Docker for containerization. The frontend is a Next.js static export deployable to any CDN. The entire stack can be spun up locally with docker-compose."*
+
+### Ethical/Safety Questions
+
+**Q: "What if your model is wrong and someone gets hurt?"**
+> *"Three safeguards: (1) The model is designated NOT_OPERATIONALLY_VALIDATED until tested against real continuous data. (2) The system NEVER automatically acts — all interventions require human authorization. (3) Every prediction carries explicit uncertainty quantification, quality states, and the mandatory disclaimer: 'Decision Support Only — statistical association, not confirmed causality.' We've designed for graceful uncertainty, not false confidence."*
+
+**Q: "What about data privacy for citizen reporters?"**
+> *"Privacy-aware reporter identity is built in. Reports support optional contact info. Rate limiting prevents spam. Duplicate detection clusters reports without exposing identities. Moderation workflows handle suspicious reports. The entire audit trail is available only to authorized roles (not public)."*
+
+---
+
+## 13. Competition Strategy & Presentation Tips {#13-strategy}
+
+### Demo Flow (10 minutes)
+
+1. **Problem Statement** (1 min): Show the NH-54 corridor on the map, explain single-road dependency
+2. **Live Architecture** (2 min): Walk through the 10-stage pipeline diagram
+3. **Map Demo** (2 min): Show all 7 layers, demonstrate spatial queries
+4. **Risk Assessment** (2 min): Show a risk prediction with feature decomposition, highlight uncertainty
+5. **Consequence Chain** (2 min): Show slope → road → village impact graph
+6. **Action Authorization** (1 min): Show the warning lifecycle with human-in-the-loop
+
+### What to Emphasize:
+- ✅ **Operational completeness** — end-to-end from detection to verified outcome
+- ✅ **Production-grade engineering** — tests, CI, security, Docker
+- ✅ **Intellectual honesty** — uncertainty visible, non-autonomous, anti-fabrication
+- ✅ **Domain expertise** — you understand landslides, not just ML
+- ✅ **NER-specific** — lifeline analysis, offline operations, degraded connectivity
+
+### What to Avoid:
+- ❌ Don't say "we use AI to predict landslides" — every team says this
+- ❌ Don't claim 99% accuracy — claim transparent, calibrated probabilities
+- ❌ Don't show just a pretty map — show the operational decision chain
+- ❌ Don't hide limitations — embrace them (NOT_OPERATIONALLY_VALIDATED is honest)
+- ❌ Don't skip the security story — it shows maturity
+
+### Killer Differentiators to Drop Casually:
+1. *"Our Warning Ledger uses a cryptographic hash chain, similar to blockchain principles, for tamper-evident audit trails"*
+2. *"We enforce anti-pickle architecture — no deserialization vulnerabilities in our ML pipeline"*
+3. *"We have 37 test files with coverage from SSRF defense to spatial leakage prevention"*
+4. *"Our consequence engine maintains strict conceptual separation between Risk, Criticality, and Consequence — we never multiply them into an arbitrary danger score"*
+5. *"Every prediction includes mandatory provenance: which model version, which features, what quality state, and the exact SHA-256 hash of the input snapshot"*
+
+---
+
+> [!TIP]
+> ## Final Note for the Team
+> This project isn't just a hackathon project — it's built like a real production system. That's your biggest competitive advantage. Most SIH teams show a demo. You can show a **system** — with architecture documents, test suites, security audits, CI pipelines, and 10 stages of documented engineering evolution.
+>
+> **Own the engineering story. That's what wins.**
+
+---
+
+*Document prepared by reviewing the complete codebase: 27 API route modules, 16 schema files, 37 test files, 10 architecture documents, 15 verification scripts, and the full 966-line PRD.*

@@ -1,0 +1,51 @@
+{
+  "dataset_title": "Sentinel NER 2026 Master Geospatial ML Dataset",
+  "coverage_region": "North Eastern Region of India (8 States)",
+  "state_count": 8,
+  "total_records": 271,
+  "total_features": 53,
+  "spatial_resolution_meters": 250.0,
+  "projected_crs": "EPSG:32646 (UTM Zone 46N)",
+  "geographic_crs": "EPSG:4326 (WGS84)",
+  "bounding_box": {
+    "min_latitude": 22.021319,
+    "max_latitude": 28.875004,
+    "min_longitude": 88.119237,
+    "max_longitude": 95.188893
+  },
+  "observation_year_breakdown": {
+    "OBSERVED_2026": "Sentinel-2 MSI Level-2A, GSI Bhukosh Incident Inventory",
+    "NRT_2026": "IMD Daily Gridded Precipitation, Temperature Observations",
+    "DERIVED_2026": "Cloud-Masked NDVI, EVI, NDWI, NBR, FVC",
+    "STATIC_BASELINE": "NASA SRTM 30m DEM (2000), ISRIC SoilGrids (2020), HydroSHEDS (2000)",
+    "LATEST_AVAILABLE_NOT_2026": "ESA WorldCover 10m (2021), WII Protected Areas (2023)"
+  },
+  "audit_percentages": {
+    "percentage_of_dynamic_features_from_2026": 28.3,
+    "percentage_of_features_derived_from_2026": 16.98,
+    "percentage_of_features_from_static_baselines": 41.51,
+    "percentage_of_features_historical": 13.21
+  },
+  "missing_data_summary": {
+    "max_feature_missing_pct": 0.0,
+    "avg_missing_pct": 0.0,
+    "silent_imputation_prevented": true
+  },
+  "target_distributions": {
+    "target_landslide_risk": {
+      "2": 98,
+      "1": 87,
+      "0": 62,
+      "3": 24
+    },
+    "target_flood_risk": {
+      "0": 242,
+      "1": 29
+    }
+  },
+  "audit_compliance": {
+    "no_fabricated_2026_data": true,
+    "cloud_shadow_masking_enforced": true,
+    "spatial_autocorrelation_mitigated": true
+  }
+}

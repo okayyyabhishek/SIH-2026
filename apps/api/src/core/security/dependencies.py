@@ -3,7 +3,7 @@ Sentinel NER — FastAPI Authorization Dependencies
 Authoritative server-side identity, permission evaluation, and multi-tenant scoping.
 """
 
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Union
 
 from fastapi import Depends, Path, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -18,8 +18,11 @@ from src.core.logging import correlation_id_ctx
 from src.core.security.jwt import decode_and_validate_token
 from src.core.security.rbac import (
     Permission,
+    Role,
     evaluate_scope_access,
+    has_any_permission,
     has_permission,
+    normalize_role,
 )
 from src.db.repository import repository
 from src.schemas.identity import MembershipStatus, UserStatus
@@ -189,3 +192,71 @@ def require_scope_access(org_id_param: str = "id") -> Callable:
         return user
 
     return _scope_dependency
+
+
+def require_any_permission(*permissions: Union[Permission, str]) -> Callable:
+    """
+    Dependency factory verifying that the authenticated user possesses at least one of the specified capabilities.
+    """
+    perm_vals = [p.value if isinstance(p, Permission) else str(p) for p in permissions]
+
+    async def _any_perm_dependency(
+        request: Request,
+        user: Dict[str, Any] = Depends(get_current_user),
+    ) -> Dict[str, Any]:
+        user_role = user.get("role")
+        if not has_any_permission(user_role, perm_vals):
+            cid = correlation_id_ctx.get()
+            client_ip = request.client.host if request.client else "unknown"
+            await repository.record_security_event(
+                event_type="PERMISSION_DENIED",
+                actor_user_id=user.get("id"),
+                actor_role=user_role,
+                organization_id=user.get("organization_id"),
+                resource=str(request.url.path),
+                action=str(request.method),
+                result="DENIED",
+                correlation_id=cid,
+                client_ip=client_ip,
+                details={"required_any_permissions": perm_vals},
+            )
+            raise ForbiddenException(
+                f"Actor role '{user_role}' lacks required capabilities (requires one of {perm_vals})."
+            )
+        return user
+
+    return _any_perm_dependency
+
+
+def require_role(*roles: Union[Role, str]) -> Callable:
+    """
+    Dependency factory verifying that the authenticated user possesses one of the allowed roles.
+    """
+    allowed_roles = {normalize_role(r) for r in roles}
+
+    async def _role_dependency(
+        request: Request,
+        user: Dict[str, Any] = Depends(get_current_user),
+    ) -> Dict[str, Any]:
+        user_role = normalize_role(user.get("role", ""))
+        if user_role not in allowed_roles:
+            cid = correlation_id_ctx.get()
+            client_ip = request.client.host if request.client else "unknown"
+            await repository.record_security_event(
+                event_type="ROLE_UNAUTHORIZED",
+                actor_user_id=user.get("id"),
+                actor_role=user.get("role"),
+                organization_id=user.get("organization_id"),
+                resource=str(request.url.path),
+                action=str(request.method),
+                result="DENIED",
+                correlation_id=cid,
+                client_ip=client_ip,
+                details={"allowed_roles": [r.value for r in allowed_roles]},
+            )
+            raise ForbiddenException(
+                f"Actor role '{user.get('role')}' is not authorized. Allowed roles: {[r.value for r in allowed_roles]}."
+            )
+        return user
+
+    return _role_dependency

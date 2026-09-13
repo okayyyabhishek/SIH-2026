@@ -1,0 +1,228 @@
+{
+  "RandomForest": {
+    "val_accuracy": 0.8679,
+    "val_f1_macro": 0.9034,
+    "val_f1_weighted": 0.8592,
+    "val_precision": 0.8977,
+    "val_recall": 0.8679,
+    "test_accuracy": 1.0,
+    "test_f1_macro": 1.0,
+    "test_f1_weighted": 1.0,
+    "test_precision": 1.0,
+    "test_recall": 1.0,
+    "test_roc_auc_ovr_macro": 1.0,
+    "test_log_loss": 0.2017,
+    "confusion_matrix": [
+      [
+        12,
+        0,
+        0
+      ],
+      [
+        0,
+        14,
+        0
+      ],
+      [
+        0,
+        0,
+        5
+      ]
+    ],
+    "per_class_metrics": {
+      "Low (0)": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 12.0
+      },
+      "Moderate (1)": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 14.0
+      },
+      "High (2)": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 5.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 31.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 31.0
+      }
+    },
+    "top_features": [
+      [
+        "nearest_landslide_distance_km",
+        0.22063731218886976
+      ],
+      [
+        "landslide_history_flag",
+        0.12502837005843198
+      ],
+      [
+        "soil_organic_carbon",
+        0.07364649034886252
+      ],
+      [
+        "slope_deg",
+        0.054810037391322695
+      ],
+      [
+        "forest_cover_pct",
+        0.04437872796893193
+      ],
+      [
+        "soil_ph",
+        0.038513966681654986
+      ],
+      [
+        "soil_bulk_density",
+        0.03805980145855748
+      ],
+      [
+        "district_code",
+        0.03553654468779047
+      ]
+    ]
+  },
+  "XGBoost": {
+    "val_accuracy": 1.0,
+    "val_f1_macro": 1.0,
+    "val_f1_weighted": 1.0,
+    "val_precision": 1.0,
+    "val_recall": 1.0,
+    "test_accuracy": 1.0,
+    "test_f1_macro": 1.0,
+    "test_f1_weighted": 1.0,
+    "test_precision": 1.0,
+    "test_recall": 1.0,
+    "test_roc_auc_ovr_macro": 1.0,
+    "test_log_loss": 0.0106,
+    "confusion_matrix": [
+      [
+        12,
+        0,
+        0
+      ],
+      [
+        0,
+        14,
+        0
+      ],
+      [
+        0,
+        0,
+        5
+      ]
+    ],
+    "per_class_metrics": {
+      "Low (0)": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 12.0
+      },
+      "Moderate (1)": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 14.0
+      },
+      "High (2)": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 5.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 31.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 31.0
+      }
+    }
+  },
+  "LogisticRegression": {
+    "val_accuracy": 0.7925,
+    "val_f1_macro": 0.8418,
+    "val_f1_weighted": 0.7715,
+    "val_precision": 0.8227,
+    "val_recall": 0.7925,
+    "test_accuracy": 0.9677,
+    "test_f1_macro": 0.9515,
+    "test_f1_weighted": 0.9665,
+    "test_precision": 0.9699,
+    "test_recall": 0.9677,
+    "test_roc_auc_ovr_macro": 0.9881,
+    "test_log_loss": 0.1267,
+    "confusion_matrix": [
+      [
+        12,
+        0,
+        0
+      ],
+      [
+        0,
+        14,
+        0
+      ],
+      [
+        0,
+        1,
+        4
+      ]
+    ],
+    "per_class_metrics": {
+      "Low (0)": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 12.0
+      },
+      "Moderate (1)": {
+        "precision": 0.9333333333333333,
+        "recall": 1.0,
+        "f1-score": 0.9655172413793104,
+        "support": 14.0
+      },
+      "High (2)": {
+        "precision": 1.0,
+        "recall": 0.8,
+        "f1-score": 0.8888888888888888,
+        "support": 5.0
+      },
+      "accuracy": 0.967741935483871,
+      "macro avg": {
+        "precision": 0.9777777777777779,
+        "recall": 0.9333333333333332,
+        "f1-score": 0.9514687100893998,
+        "support": 31.0
+      },
+      "weighted avg": {
+        "precision": 0.9698924731182795,
+        "recall": 0.967741935483871,
+        "f1-score": 0.9665059943146707,
+        "support": 31.0
+      }
+    }
+  }
+}

@@ -101,12 +101,12 @@ export default function OperationalMapPage() {
         leRes,
       ] = await Promise.allSettled([
         fetchDistricts({ limit: 100 }),
-        fetchSlopeUnits(distParams),
+        fetchSlopeUnits({ ...distParams, limit: 100 }),
         fetchRoads(distParams),
         fetchRoadChainages(distParams),
         fetchVillages(distParams),
         fetchAssets(distParams),
-        fetchLandslideEvents(distParams),
+        fetchLandslideEvents({ ...distParams, limit: 100 }),
       ]);
 
       const districtsData = dRes.status === "fulfilled" ? dRes.value.items || [] : [];

@@ -4,11 +4,14 @@ Provides versioned endpoints for Risk Predictions, Explanations, Evidence,
 Model Registry, and Scoped Execution Runs.
 """
 
-from typing import List, Optional
+import json
+import os
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
 
 from src.core.errors import ForbiddenException, NotFoundException
+from src.core.risk.ml_predictor import ml_predictor
 from src.core.risk.pipeline import RiskPipelineOrchestrator
 from src.core.risk.registry import model_registry
 from src.core.security.dependencies import require_permission
@@ -26,6 +29,8 @@ from src.schemas.risk import (
     RiskPrediction,
     RiskRunRequest,
     RiskSubjectType,
+    SpatialRiskPredictionRequest,
+    SpatialRiskPredictionResponse,
 )
 
 router = APIRouter(prefix="/risk", tags=["Stage 5 — Transparent Risk Engine"])
@@ -361,3 +366,56 @@ async def trigger_risk_run(
         data=model_run,
         correlation_id=corr_id,
     )
+
+
+# =============================================================================
+# REAL-TIME SPATIAL POINT PREDICTION & MODEL EVALUATION
+# =============================================================================
+
+@router.post("/predict-point", response_model=APIEnvelope[SpatialRiskPredictionResponse])
+async def predict_point_risk(
+    payload: SpatialRiskPredictionRequest,
+    request: Request,
+    current_user: dict = Depends(require_permission(Permission.RISK_READ)),
+):
+    """
+    Executes real-time spatial point hazard inference using trained NER 2026 models
+    (Random Forest, XGBoost, or Transparent Logistic Regression) with automatic
+    nearest-neighbor feature extraction across all 8 NER states.
+    """
+    res = ml_predictor.predict_point(
+        latitude=payload.latitude,
+        longitude=payload.longitude,
+        model_type=payload.model_type or "rf",
+        feature_overrides=payload.features,
+    )
+    return APIEnvelope(
+        data=SpatialRiskPredictionResponse(**res),
+        correlation_id=getattr(request.state, "correlation_id", "default"),
+    )
+
+
+@router.get("/evaluation", response_model=APIEnvelope[Dict[str, Any]])
+async def get_model_evaluation_report(
+    request: Request,
+    current_user: dict = Depends(require_permission(Permission.RISK_READ)),
+):
+    """Retrieves authoritative multi-model evaluation metrics and 2026 data audit summary."""
+    from src.core.risk.ml_predictor import REPO_ROOT
+    candidates = [
+        os.path.join("reports", "model_evaluation_report.json"),
+        os.path.join(os.getcwd(), "reports", "model_evaluation_report.json"),
+        os.path.join(str(REPO_ROOT), "reports", "model_evaluation_report.json"),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "reports", "model_evaluation_report.json")),
+    ]
+    data = {}
+    for cand in candidates:
+        if os.path.exists(cand):
+            with open(cand, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            break
+    return APIEnvelope(
+        data=data,
+        correlation_id=getattr(request.state, "correlation_id", "default"),
+    )
+

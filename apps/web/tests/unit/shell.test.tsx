@@ -1,6 +1,6 @@
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { SentinelShell } from "@/components/layout/SentinelShell";
 import { RequireRolePlaceholder } from "@/components/auth/RequireRolePlaceholder";
 import { ActionQueuePreview } from "@/components/dashboard/ActionQueuePreview";
@@ -10,6 +10,24 @@ import { useAuthStore } from "@/lib/auth";
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",
 }));
+
+beforeEach(() => {
+  useAuthStore.setState({
+    user: {
+      id: "usr-admin-1",
+      email: "admin@sentinel.ner.internal",
+      full_name: "Platform Administrator",
+      status: "ACTIVE",
+      role: "PLATFORM_ADMIN",
+      organization_id: "org-sdma-mizoram",
+      organization_name: "Mizoram SDMA",
+      jurisdiction_scope: "GLOBAL",
+      permissions: [],
+    },
+    isAuthenticated: true,
+    token: "mock-admin-token",
+  });
+});
 
 describe("Sentinel NER — Government Standard Shell", () => {
   it("renders the accessible skip-to-content link targeting #main-content", () => {
@@ -37,12 +55,20 @@ describe("Sentinel NER — Government Standard Shell", () => {
     expect(screen.getAllByText("Command Center").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Spatial Map").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Creep Watch").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Live Weather").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Warning Ledger").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Field & Community/).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Alerts & Delivery").length).toBeGreaterThan(0);
   });
 
   it("displays government header elements and status indicators", () => {
+    // Unauthenticated state
+    useAuthStore.setState({
+      user: null,
+      isAuthenticated: false,
+      token: null,
+    });
+
     render(
       <SentinelShell>
         <div>Test Content</div>
@@ -309,3 +335,105 @@ describe("Sentinel NER — Dropdown Navigation & Feature Organization", () => {
     expect(screen.getByRole("button", { name: /Expand All/i })).toBeDefined();
   });
 });
+
+describe("Sentinel NER — Role-Aware Shell Navigation", () => {
+  it("restricts public USER to strictly 4 modules across top nav, sidebar, and mobile dock", () => {
+    useAuthStore.setState({
+      user: {
+        id: "usr-user-gmail",
+        email: "user@gmail.com",
+        full_name: "Operational User",
+        status: "ACTIVE",
+        role: "USER",
+        organization_id: "public",
+        organization_name: "Citizen Observation Network",
+        jurisdiction_scope: "LOCAL",
+        permissions: [],
+      },
+      isAuthenticated: true,
+      token: "mock-user-token",
+    });
+
+    render(
+      <SentinelShell>
+        <div>User Role Workspace</div>
+      </SentinelShell>
+    );
+
+    const topNav = screen.getByRole("navigation", { name: "Primary Portal Navigation" });
+    const sidebar = screen.getByRole("navigation", { name: "Sidebar Navigation" });
+    const mobileNav = screen.getByRole("navigation", { name: "Mobile Bottom Navigation" });
+
+    // 1. Top Portal Navigation: Exclusively the 4 designated modules
+    expect(within(topNav).getByText("Spatial Map")).toBeDefined();
+    expect(within(topNav).getByText("Live Weather")).toBeDefined();
+    expect(within(topNav).getByText("Field & Community")).toBeDefined();
+    expect(within(topNav).getByText("Alerts & Delivery")).toBeDefined();
+    expect(within(topNav).queryByText("SENTINEL AI")).toBeNull();
+    expect(within(topNav).queryByText("Command Center")).toBeNull();
+    expect(within(topNav).queryByText("Operations")).toBeNull();
+
+    // 2. Sidebar Navigation: Strictly the 4 designated modules
+    expect(within(sidebar).getAllByText("Spatial Map").length).toBeGreaterThan(0);
+    expect(within(sidebar).getAllByText("Live Weather").length).toBeGreaterThan(0);
+    expect(within(sidebar).getAllByText(/Field & Community/).length).toBeGreaterThan(0);
+    expect(within(sidebar).getAllByText("Alerts & Delivery").length).toBeGreaterThan(0);
+
+    // Sidebar MUST NOT contain any other modules
+    expect(within(sidebar).queryByText("Command Center")).toBeNull();
+    expect(within(sidebar).queryByText("Creep Watch")).toBeNull();
+    expect(within(sidebar).queryByText("Early Warning Matrix")).toBeNull();
+    expect(within(sidebar).queryByText("Satellite Hydrology")).toBeNull();
+    expect(within(sidebar).queryByText("Subsurface Geotech")).toBeNull();
+    expect(within(sidebar).queryByText("Highway Corridors")).toBeNull();
+    expect(within(sidebar).queryByText("SENTINEL AI")).toBeNull();
+    expect(within(sidebar).queryByText("Operations Matrix")).toBeNull();
+
+    // 3. Mobile Navigation: Contains only the 4 modules plus Menu
+    expect(within(mobileNav).getByText("Spatial Map")).toBeDefined();
+    expect(within(mobileNav).getByText("Live Weather")).toBeDefined();
+    expect(within(mobileNav).getByText("Field & Community")).toBeDefined();
+    expect(within(mobileNav).getByText("Alerts & Delivery")).toBeDefined();
+    expect(within(mobileNav).getByText("Menu")).toBeDefined();
+    expect(within(mobileNav).queryByText("Sentinel AI")).toBeNull();
+    expect(within(mobileNav).queryByText("Command")).toBeNull();
+    expect(within(mobileNav).queryByText("Operations")).toBeNull();
+  });
+
+  it("restricts FIELD_OFFICER to operational/highway modules without command center or creep watch", () => {
+    useAuthStore.setState({
+      user: {
+        id: "usr-field-1",
+        email: "field.kolasib@sentinel.ner.internal",
+        full_name: "Highway Patrol Inspector Lalhmingthanga",
+        status: "ACTIVE",
+        role: "FIELD_OFFICER",
+        organization_id: "org-hp-kolasib",
+        organization_name: "Kolasib Highway Patrol",
+        jurisdiction_scope: "NH-54",
+        permissions: [],
+      },
+      isAuthenticated: true,
+      token: "mock-field-token",
+    });
+
+    render(
+      <SentinelShell>
+        <div>Field Officer Workspace</div>
+      </SentinelShell>
+    );
+
+    const sidebar = screen.getByRole("navigation", { name: "Sidebar Navigation" });
+
+    // Field Officer sees Highway Corridors & Consequence Intel in sidebar
+    expect(within(sidebar).getAllByText("Highway Corridors").length).toBeGreaterThan(0);
+    expect(within(sidebar).getAllByText("Consequence Intel").length).toBeGreaterThan(0);
+
+    // Field Officer does NOT see Command Center or Creep Watch or Satellite Hydrology in sidebar
+    expect(within(sidebar).queryByText("Command Center")).toBeNull();
+    expect(within(sidebar).queryByText("Creep Watch")).toBeNull();
+    expect(within(sidebar).queryByText("Satellite Hydrology")).toBeNull();
+    expect(within(sidebar).queryByText("Subsurface Geotech")).toBeNull();
+  });
+});
+

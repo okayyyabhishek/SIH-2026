@@ -1,0 +1,50 @@
+column_name,dtype,role,required,description,unit,encoding
+sample_id,string,identifier,True,Unique observation record identifier,none,string
+grid_id,string,identifier,True,Standardized 250m spatial cell code,none,string
+date,string,temporal,True,Calendar date of observation (YYYY-MM-DD),date,iso_date
+year,int64,temporal,True,Observation year (2026),years,integer
+month,int64,temporal,True,Observation month (1-12),months,integer
+state_code,int64,categorical,True,Numerical state identifier (1 to 8),code,integer_lookup
+district_code,int64,categorical,True,Authoritative Census district identifier,code,integer_lookup
+latitude,float64,coordinate,True,WGS84 centroid latitude,degrees_north,float
+longitude,float64,coordinate,True,WGS84 centroid longitude,degrees_east,float
+elevation_m,float64,continuous,True,Topographic elevation from SRTM 30m,meters,float
+slope_deg,float64,continuous,True,Topographic slope gradient,degrees,float
+aspect_deg,float64,continuous,True,Slope compass aspect angle,degrees,float
+terrain_ruggedness,float64,continuous,True,Terrain Ruggedness Index,index,float
+relief_m,float64,continuous,True,Local elevation relief difference,meters,float
+rainfall_1d_mm,float64,continuous,True,1-day antecedent rainfall accumulation,mm,float
+rainfall_3d_mm,float64,continuous,True,3-day rolling rainfall accumulation,mm,float
+rainfall_7d_mm,float64,continuous,True,7-day rolling rainfall accumulation,mm,float
+rainfall_30d_mm,float64,continuous,True,30-day rolling rainfall accumulation,mm,float
+rainfall_90d_mm,float64,continuous,True,90-day seasonal rainfall accumulation,mm,float
+temperature_mean_c,float64,continuous,True,Daily mean 2m air temperature,celsius,float
+temperature_max_c,float64,continuous,True,Daily maximum 2m air temperature,celsius,float
+temperature_min_c,float64,continuous,True,Daily minimum 2m air temperature,celsius,float
+temperature_range_c,float64,continuous,True,Diurnal temperature range,celsius,float
+humidity_pct,float64,continuous,True,Mean relative atmospheric humidity,percent,float
+ndvi,float64,continuous,True,Normalized Difference Vegetation Index,index,float
+evi,float64,continuous,True,Enhanced Vegetation Index,index,float
+ndwi,float64,continuous,True,Normalized Difference Water Index,index,float
+nbr,float64,continuous,True,Normalized Burn Ratio,index,float
+vegetation_fraction,float64,continuous,True,Fractional vegetation cover,fraction,float
+soil_ph,float64,continuous,True,Soil pH in water (0-30cm),pH,float
+soil_organic_carbon,float64,continuous,True,Soil organic carbon stock,g/kg,float
+soil_clay_pct,float64,continuous,True,Soil clay particle fraction,percent,float
+soil_sand_pct,float64,continuous,True,Soil sand particle fraction,percent,float
+soil_silt_pct,float64,continuous,True,Soil silt particle fraction,percent,float
+soil_bulk_density,float64,continuous,True,Fine earth bulk density,cg/cm3,float
+soil_water_capacity,float64,continuous,True,Available water capacity,cm3/cm3,float
+landcover_code,int64,categorical,True,ESA WorldCover numerical class (1-11),code,one_hot_or_integer
+distance_to_river_m,float64,continuous,True,Metric distance to HydroSHEDS river,meters,float
+distance_to_water_m,float64,continuous,True,Metric distance to open surface water,meters,float
+water_occurrence_pct,float64,continuous,True,JRC surface water occurrence,percent,float
+drainage_density,float64,continuous,True,Drainage channel density,km/km2,float
+forest_cover_pct,float64,continuous,True,Canopy forest cover density,percent,float
+protected_area_flag,int64,categorical,True,Inside protected wildlife area flag (0/1),flag,binary
+distance_to_protected_area_m,float64,continuous,True,Metric distance to protected polygon,meters,float
+flood_history_flag,int64,continuous,True,Historical flood event flag (0/1),flag,binary
+landslide_history_flag,int64,continuous,True,Historical landslide event flag (0/1),flag,binary
+target_flood_risk,int64,target,False,Flood susceptibility tier (0=Low to 3=VeryHigh),class,integer_multiclass
+target_landslide_risk,int64,target,False,Landslide susceptibility tier (0=Low to 3=VeryHigh),class,integer_multiclass
+data_quality_score,float64,metadata,True,Composite data quality & freshness score,score,float

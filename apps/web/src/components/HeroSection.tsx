@@ -16,9 +16,11 @@ import {
   Satellite,
   Search,
 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export function HeroSection() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [activeSim, setActiveSim] = useState<"nominal" | "monsoon">("nominal");
   const [selectedHotspot, setSelectedHotspot] = useState<string | null>("NH54-KM42");
   const [searchQuery, setSearchQuery] = useState("");
@@ -124,13 +126,13 @@ export function HeroSection() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600 dark:bg-emerald-400" />
               </span>
-              <span>System Operational — Updated Hourly</span>
+              <span>{t("hero.systemOperational", "System Operational — Updated Hourly")}</span>
             </div>
 
             {/* Region Pill */}
             <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium">
               <MapPin className="h-3.5 w-3.5 text-gov-blue dark:text-cyan-400" />
-              <span>Northeast Region (NER) Strategic Corridors</span>
+              <span>{t("hero.nerCorridors", "Northeast Region (NER) Strategic Corridors")}</span>
             </div>
 
             {/* InSAR Satellite Uplink Pill */}
@@ -143,7 +145,7 @@ export function HeroSection() {
           {/* Operational Readiness / Simulation Switcher */}
           <div className="flex flex-nowrap items-center gap-1.5 bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 p-0.5 rounded-full shadow-inner shrink-0">
             <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 pl-2 pr-1">
-              Scenario:
+              {t("hero.scenario", "Scenario:")}
             </span>
             <button
               type="button"
@@ -154,7 +156,7 @@ export function HeroSection() {
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              Baseline Nominal
+              {t("hero.baselineNominal", "Baseline Nominal")}
             </button>
             <button
               type="button"
@@ -166,7 +168,7 @@ export function HeroSection() {
               }`}
             >
               <Zap className="h-3 w-3" />
-              <span>Monsoon Surge</span>
+              <span>{t("hero.monsoonSurge", "Monsoon Surge")}</span>
             </button>
           </div>
         </div>
@@ -182,17 +184,15 @@ export function HeroSection() {
                 <span className="font-semibold">भारत सरकार — राष्ट्रीय भूस्खलन पूर्व चेतावनी मंच</span>
               </div>
               <h1 className="text-xl sm:text-2xl md:text-[26px] lg:text-[32px] xl:text-[38px] font-extrabold tracking-tight leading-[1.2] text-slate-900 dark:text-white amrita-hero-title sm:whitespace-nowrap">
-                National Landslide Early Warning & Risk Management Platform
+                {t("hero.title", "National Landslide Early Warning & Risk Management Platform")}
               </h1>
               <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-                Geological Survey of India (GSI) • National Disaster Management Authority (NDMA) • Ministry of Earth Sciences
+                {t("hero.ministries", "Geological Survey of India (GSI) • National Disaster Management Authority (NDMA) • Ministry of Earth Sciences")}
               </p>
             </div>
 
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl amrita-hero-desc">
-              Real-time geotechnical intelligence, calibrated slope-unit susceptibility models, and
-              satellite surface deformation monitoring across India&apos;s most vulnerable transport
-              corridors and mountain habitations.
+              {t("hero.desc", "Real-time geotechnical intelligence, calibrated slope-unit susceptibility models, and satellite surface deformation monitoring across India's most vulnerable transport corridors and mountain habitations.")}
             </p>
 
             {/* ── Government National Portal Search Bar ── */}
@@ -212,7 +212,7 @@ export function HeroSection() {
                         router.push(`/map?q=${encodeURIComponent(query)}${categoryParam}`);
                       }
                     }}
-                    placeholder="Search Highway Corridor, Slope Unit, or Village (e.g., NH-54, KM 42+350)..."
+                    placeholder={t("hero.searchPlaceholder", "Search Highway Corridor, Slope Unit, or Village (e.g., NH-54, KM 42+350)...")}
                     className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-gov-blue dark:focus:ring-cyan-500 text-slate-900 dark:text-white placeholder:text-slate-400"
                   />
                 </div>
@@ -223,10 +223,10 @@ export function HeroSection() {
                   aria-label="Filter Search by Category"
                   className="px-3 py-2 text-xs rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-gov-blue font-medium"
                 >
-                  <option value="all">All Corridors</option>
-                  <option value="highways">National Highways</option>
-                  <option value="slopes">High-Risk Slopes</option>
-                  <option value="settlements">Habitation Zones</option>
+                  <option value="all">{t("hero.allCorridors", "All Corridors")}</option>
+                  <option value="highways">{t("hero.nationalHighways", "National Highways")}</option>
+                  <option value="slopes">{t("hero.highRiskSlopes", "High-Risk Slopes")}</option>
+                  <option value="settlements">{t("hero.habitationZones", "Habitation Zones")}</option>
                 </select>
 
                 <Link
@@ -234,13 +234,13 @@ export function HeroSection() {
                   className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-gov-blue hover:bg-gov-blue-dark text-white font-bold text-xs shadow-sm transition-all dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950"
                 >
                   <Search className="h-3.5 w-3.5" />
-                  <span>Search</span>
+                  <span>{t("common.search", "Search")}</span>
                 </Link>
               </div>
 
               {/* Quick Filter Chips */}
               <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
-                <span className="text-slate-500 dark:text-slate-400 font-semibold">Priority Zones:</span>
+                <span className="text-slate-500 dark:text-slate-400 font-semibold">{t("hero.priorityZones", "Priority Zones:")}</span>
                 <button
                   type="button"
                   aria-pressed={selectedHotspot === "NH54-KM42"}

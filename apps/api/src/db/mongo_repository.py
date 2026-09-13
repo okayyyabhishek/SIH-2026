@@ -241,6 +241,9 @@ class MongoRepository:
             ("usr-auditor-1", "auditor.ne@sentinel.ner.internal", "V. Chhetri (Independent Safety Auditor)", "SentinelAuditor@2026!", "OBSERVER_AUDITOR", "org-sdma-mizoram"),
             ("usr-auditor-2", "observer@sentinel.ner.internal", "Sentinel Observer Auditor", "SentinelObserver@2026!", "OBSERVER_AUDITOR", "org-sdma-mizoram"),
             ("usr-citizen-1", "citizen@sentinel.ner.internal", "Lalthanpuia (Citizen Reporter)", "SentinelCitizen@2026!", "CITIZEN_REPORTER", "org-ddma-aizawl"),
+            ("usr-admin-gmail", "admin@gmail.com", "Platform Admin", "SentinelAdmin@2026!", "PLATFORM_ADMIN", "org-sdma-mizoram"),
+            ("usr-user-gmail", "user@gmail.com", "Operational User", "SentinelDdma@2026!", "USER", "org-ddma-aizawl"),
+            ("usr-patrol-gmail", "patrol@gmail.com", "Highway Patrol Officer", "SentinelField@2026!", "FIELD_OFFICER", "org-ddma-aizawl"),
         ]
         for uid, email, name, pwd, role, org_id in users_data:
             u_dict = {

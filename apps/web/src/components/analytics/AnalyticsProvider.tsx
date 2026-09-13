@@ -13,7 +13,7 @@ const AnalyticsContext = createContext<AnalyticsContextType>({
   trackOperationalMetric: () => {},
 });
 
-export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
+function NavigationEvents() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -33,6 +33,10 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, searchParams]);
 
+  return null;
+}
+
+export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const trackEvent = useCallback((category: string, action: string, label?: string, value?: number) => {
     try {
       const consent = localStorage.getItem("sentinel_cookie_consent");
@@ -54,6 +58,9 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AnalyticsContext.Provider value={{ trackEvent, trackOperationalMetric }}>
+      <React.Suspense fallback={null}>
+        <NavigationEvents />
+      </React.Suspense>
       {children}
     </AnalyticsContext.Provider>
   );

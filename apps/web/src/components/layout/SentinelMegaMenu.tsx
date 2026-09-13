@@ -27,6 +27,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
+import { useAuthStore } from "@/lib/auth";
+import { hasPermission, ROUTE_PERMISSIONS } from "@/lib/rbac";
 
 interface MegaMenuItem {
   title: string;
@@ -462,9 +464,30 @@ const MEGA_MENU_DATA: MegaMenuCategory[] = [
 export function SentinelMegaMenu() {
   const pathname = usePathname();
   const { t } = useTranslation();
+  const { user } = useAuthStore();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const menuContainerRef = useRef<HTMLDivElement>(null);
+
+  // Canonical RBAC: Filter mega menu categories, columns, and items by user permissions
+  const filteredMegaMenuData = React.useMemo(() => {
+    return MEGA_MENU_DATA.map((cat) => {
+      const filteredColumns = cat.columns
+        .map((col) => {
+          const filteredItems = col.items.filter((item) => {
+            const requiredPerm = ROUTE_PERMISSIONS[item.href];
+            return !requiredPerm || hasPermission(user, requiredPerm);
+          });
+          return { ...col, items: filteredItems };
+        })
+        .filter((col) => col.items.length > 0);
+
+      return {
+        ...cat,
+        columns: filteredColumns,
+      };
+    }).filter((cat) => cat.columns.length > 0);
+  }, [user]);
 
   // Close menu when navigating to a new path
   useEffect(() => {
@@ -511,22 +534,22 @@ export function SentinelMegaMenu() {
     setActiveCategory((prev) => (prev === catId ? null : catId));
   };
 
-  const activeCategoryData = MEGA_MENU_DATA.find((c) => c.id === activeCategory);
+  const activeCategoryData = filteredMegaMenuData.find((c) => c.id === activeCategory);
 
   const getBadgeClass = (color?: string) => {
     switch (color) {
       case "cyan":
-        return "badge-cyan bg-cyan-50 text-cyan-700 border-cyan-200/90 dark:bg-cyan-950/70 dark:text-cyan-300 dark:border-cyan-800/80";
+        return "badge-cyan bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-cyan-950/80 dark:text-cyan-300 dark:border-cyan-700/80 font-bold";
       case "amber":
-        return "badge-amber bg-amber-50 text-amber-800 border-amber-200/90 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800/80";
+        return "badge-amber bg-amber-50 text-amber-900 border-amber-300 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-700/80 font-bold";
       case "emerald":
-        return "badge-emerald bg-emerald-50 text-emerald-800 border-emerald-200/90 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800/80";
+        return "badge-emerald bg-emerald-50 text-emerald-900 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700/80 font-bold";
       case "purple":
-        return "badge-purple bg-purple-50 text-purple-800 border-purple-200/90 dark:bg-purple-950/70 dark:text-purple-300 dark:border-purple-800/80";
+        return "badge-purple bg-purple-50 text-purple-900 border-purple-300 dark:bg-purple-950/80 dark:text-purple-300 dark:border-purple-700/80 font-bold";
       case "rose":
-        return "badge-rose bg-rose-50 text-rose-800 border-rose-200/90 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800/80";
+        return "badge-rose bg-rose-50 text-rose-900 border-rose-300 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-700/80 font-bold";
       default:
-        return "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
+        return "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 font-bold";
     }
   };
 
@@ -606,7 +629,7 @@ export function SentinelMegaMenu() {
         aria-label="Domain Intelligence Navigation"
         className="flex items-center space-x-1 xl:space-x-1.5 text-xs font-bold overflow-x-auto no-scrollbar py-0.5"
       >
-        {MEGA_MENU_DATA.map((cat) => {
+        {filteredMegaMenuData.map((cat) => {
           const isOpen = activeCategory === cat.id;
           const isCategoryActive = cat.columns.some((col) =>
             col.items.some((item) => pathname === item.href)
@@ -672,7 +695,7 @@ export function SentinelMegaMenu() {
                       <h3 className="text-sm font-black tracking-wider text-slate-900 dark:text-white uppercase font-heading">
                         {activeCategoryData.translationKey ? t(activeCategoryData.translationKey, activeCategoryData.label) : activeCategoryData.label}
                       </h3>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 uppercase tracking-wider">
+                      <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 uppercase tracking-wider">
                         {theme.tagLabel}
                       </span>
                     </div>
@@ -700,11 +723,11 @@ export function SentinelMegaMenu() {
                     <div className="flex items-center justify-between pb-2 border-b border-slate-200/90 dark:border-slate-800/80">
                       <div className="flex items-center gap-2">
                         <span className={`h-2 w-2 rounded-full ${theme.colDot}`} />
-                        <h4 className="mega-column-heading text-[11px] font-mono font-black uppercase tracking-widest text-slate-800 dark:text-slate-200">
+                        <h4 className="mega-column-heading text-xs font-bold font-heading uppercase tracking-wider text-slate-900 dark:text-slate-100">
                           {col.headingTranslationKey ? t(col.headingTranslationKey, col.heading) : col.heading}
                         </h4>
                       </div>
-                      <span className="text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500">
+                      <span className="text-[10px] font-sans font-bold text-slate-400 dark:text-slate-500">
                         0{colIdx + 1}
                       </span>
                     </div>
@@ -738,7 +761,7 @@ export function SentinelMegaMenu() {
                                   </span>
                                   {item.badge && (
                                     <span
-                                      className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border shrink-0 tracking-wide uppercase ${getBadgeClass(
+                                      className={`text-[10px] font-sans font-bold px-2 py-0.5 rounded-md border shrink-0 tracking-wide uppercase shadow-2xs ${getBadgeClass(
                                         item.badgeColor
                                       )}`}
                                     >
@@ -770,12 +793,12 @@ export function SentinelMegaMenu() {
                     <div className="space-y-3.5 relative z-10">
                       <div className="flex items-center justify-between">
                         <span
-                          className={`inline-flex items-center gap-1.5 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border shadow-2xs ${theme.featuredTag}`}
+                          className={`inline-flex items-center gap-1.5 text-[10px] font-sans font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border shadow-2xs ${theme.featuredTag}`}
                         >
                           <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
                           {activeCategoryData.featuredCard.tag}
                         </span>
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-slate-500 font-bold">
+                        <span className="text-[10px] font-sans uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold">
                           INTELLIGENCE
                         </span>
                       </div>
@@ -816,7 +839,7 @@ export function SentinelMegaMenu() {
               </div>
 
               {/* Bottom Quick-Telemetry Status Bar */}
-              <div className="mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+              <div className="mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[11px] text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-4 flex-wrap">
                   <div className="flex items-center gap-1.5 font-medium">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -828,10 +851,10 @@ export function SentinelMegaMenu() {
                     <span>Dual-Custody Decision Authorization</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 font-mono text-[10px] text-slate-400 dark:text-slate-500">
-                  <span>DISPATCH: LIVE</span>
-                  <span>•</span>
-                  <span>NDMA PROTOCOL v3.2</span>
+                <div className="flex items-center gap-2 font-sans font-bold text-[11px] text-slate-600 dark:text-slate-400 shrink-0 whitespace-nowrap pl-2">
+                  <span className="inline-block tracking-normal">DISPATCH: LIVE</span>
+                  <span className="text-slate-300 dark:text-slate-600">•</span>
+                  <span className="inline-block tracking-normal">NDMA PROTOCOL v3.2</span>
                 </div>
               </div>
             </div>

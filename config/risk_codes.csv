@@ -1,0 +1,5 @@
+risk_code,risk_label,severity_tier,action_threshold_probability,description
+0,Low,GREEN,0.00-0.25,Normal antecedent baseline with minimal slope/flood movement probability
+1,Moderate,YELLOW,0.25-0.50,Elevated moisture or moderate slope gradient requiring passive sensor polling
+2,High,ORANGE,0.50-0.75,Subsurface pore saturation and shear creep requiring active alert broadcast
+3,Very High,RED,0.75-1.00,Imminent slope rupture or acute flood inundation requiring emergency intervention

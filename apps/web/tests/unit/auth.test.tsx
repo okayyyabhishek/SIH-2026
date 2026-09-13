@@ -12,6 +12,9 @@ vi.mock("next/navigation", () => ({
     prefetch: vi.fn(),
   }),
   usePathname: () => "/login",
+  useSearchParams: () => ({
+    get: vi.fn().mockReturnValue(null),
+  }),
 }));
 
 describe("Sentinel NER — Stage 2 Authentication UI", () => {
@@ -29,7 +32,7 @@ describe("Sentinel NER — Stage 2 Authentication UI", () => {
   it("renders the accessible login form with email, password, and security notice", () => {
     render(<LoginPage />);
 
-    expect(screen.getByText("OPERATIONAL AUTHENTICATION")).toBeDefined();
+    expect(screen.getByText(/SECURE OPERATIONAL ACCESS/i)).toBeDefined();
     expect(screen.getByText(/Authoritative Role-Based Access Control/i)).toBeDefined();
 
     const emailInput = screen.getByLabelText(/official agency email/i);

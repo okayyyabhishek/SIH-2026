@@ -381,9 +381,13 @@ class LocalObjectStorage(ObjectStorage):
     """
 
     def __init__(self, base_dir: Optional[Path | str] = None):
-        raw_dir = base_dir or getattr(settings, "SATELLITE_STORAGE_DIR", "apps/api/storage/satellite")
-        self.base_dir = Path(raw_dir).resolve()
-        self.base_dir.mkdir(parents=True, exist_ok=True)
+        raw_dir = base_dir or getattr(settings, "SATELLITE_STORAGE_DIR", "/tmp/sentinel_storage")
+        try:
+            self.base_dir = Path(raw_dir).resolve()
+            self.base_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            self.base_dir = Path("/tmp/sentinel_storage").resolve()
+            self.base_dir.mkdir(parents=True, exist_ok=True)
 
     @property
     def backend_type(self) -> StorageBackendType:

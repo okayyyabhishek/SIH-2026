@@ -130,8 +130,13 @@ export interface ConsequenceFilterParams {
 }
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ||
-  (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1` : "http://localhost:8000/api/v1");
+  typeof window !== "undefined"
+    ? "/api/v1"
+    : (process.env.INTERNAL_API_URL
+        ? `${process.env.INTERNAL_API_URL}/api/v1`
+        : (process.env.NEXT_PUBLIC_API_URL
+            ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, "")}/api/v1`
+            : "http://localhost:8000/api/v1"));
 
 export async function fetchConsequenceRelationships(
   token: string,

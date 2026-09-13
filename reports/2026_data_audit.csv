@@ -1,0 +1,54 @@
+dataset_id,dataset_name,feature,observation_start,observation_end,observation_year,product_year,access_year,2026_available,2026_status,verification_source,notes
+12,Survey of India State & District Boundaries,sample_id,2020-01-01,2024-01-01,2024,2024,2026,0,STATIC_BASELINE,SOI Geoportal,Synthetic spatial point index
+12,Survey of India State & District Boundaries,grid_id,2020-01-01,2024-01-01,2024,2024,2026,0,STATIC_BASELINE,SOI Geoportal,250m regular grid identifier
+4,IMD Daily Gridded Rainfall,date,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD Gridded Data Portal,Observation timestamp
+4,IMD Daily Gridded Rainfall,year,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD Gridded Data Portal,Observation year 2026
+4,IMD Daily Gridded Rainfall,month,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD Gridded Data Portal,Observation month
+12,Survey of India State & District Boundaries,state_code,2020-01-01,2024-01-01,2024,2024,2026,0,STATIC_BASELINE,SOI Administrative Portal,NER State Code (1-8)
+12,Survey of India State & District Boundaries,district_code,2020-01-01,2024-01-01,2024,2024,2026,0,STATIC_BASELINE,Census / SOI Administrative,District code (101-808)
+12,Survey of India State & District Boundaries,latitude,2020-01-01,2024-01-01,2024,2024,2026,0,STATIC_BASELINE,WGS84 EPSG:4326,Cell centroid latitude
+12,Survey of India State & District Boundaries,longitude,2020-01-01,2024-01-01,2024,2024,2026,0,STATIC_BASELINE,WGS84 EPSG:4326,Cell centroid longitude
+2,NASA SRTM GL1 30m Global DEM,elevation_m,2000-02-11,2000-02-22,2000,2014,2026,0,STATIC_BASELINE,NASA LP DAAC,C-band InSAR static digital elevation
+2,NASA SRTM GL1 30m Global DEM,slope_deg,2000-02-11,2000-02-22,2000,2014,2026,0,STATIC_BASELINE,NASA LP DAAC,Horn 1981 slope gradient derived in EPSG:32646
+2,NASA SRTM GL1 30m Global DEM,aspect_deg,2000-02-11,2000-02-22,2000,2014,2026,0,STATIC_BASELINE,NASA LP DAAC,Topographic azimuth aspect
+2,NASA SRTM GL1 30m Global DEM,terrain_ruggedness,2000-02-11,2000-02-22,2000,2014,2026,0,STATIC_BASELINE,Riley et al. 1999,Terrain Ruggedness Index (TRI)
+2,NASA SRTM GL1 30m Global DEM,relief_m,2000-02-11,2000-02-22,2000,2014,2026,0,STATIC_BASELINE,NASA LP DAAC,Local topographic relief max-min
+4,IMD Daily Gridded Rainfall,rainfall_1d_mm,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD Pune Gridded Binary,24-hr cumulative precipitation
+4,IMD Daily Gridded Rainfall,rainfall_3d_mm,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD Pune Gridded Binary,3-day antecedent precipitation
+4,IMD Daily Gridded Rainfall,rainfall_7d_mm,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD Pune Gridded Binary,7-day critical landslide trigger
+4,IMD Daily Gridded Rainfall,rainfall_30d_mm,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD Pune Gridded Binary,30-day cumulative pore pressure factor
+4,IMD Daily Gridded Rainfall,rainfall_90d_mm,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD Pune Gridded Binary,Seasonal monsoon saturation aggregate
+6,ERA5-Land / IMD Surface Network,temperature_mean_c,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD / Copernicus CDS,Mean diurnal temperature
+6,ERA5-Land / IMD Surface Network,temperature_max_c,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD / Copernicus CDS,Maximum diurnal temperature
+6,ERA5-Land / IMD Surface Network,temperature_min_c,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD / Copernicus CDS,Minimum diurnal temperature
+6,ERA5-Land / IMD Surface Network,temperature_range_c,2026-01-01,2026-09-08,2026,2026,2026,1,NRT_2026,IMD / Copernicus CDS,Diurnal temperature excursion
+6,ERA5-Land / IMD Surface Network,humidity_pct,2024-01-01,2025-12-31,2025,2025,2026,0,LATEST_AVAILABLE_NOT_2026,Copernicus CDS,Relative humidity at surface
+14,Sentinel-2 Derived Multispectral Indices,ndvi,2026-01-01,2026-09-08,2026,2026,2026,1,DERIVED_2026,Internal Pipeline,Normalized Difference Vegetation Index (NIR-Red)/(NIR+Red)
+14,Sentinel-2 Derived Multispectral Indices,evi,2026-01-01,2026-09-08,2026,2026,2026,1,DERIVED_2026,Internal Pipeline,Enhanced Vegetation Index with atmospheric resistance
+14,Sentinel-2 Derived Multispectral Indices,ndwi,2026-01-01,2026-09-08,2026,2026,2026,1,DERIVED_2026,Internal Pipeline,Normalized Difference Water Index (Green-NIR)/(Green+NIR)
+14,Sentinel-2 Derived Multispectral Indices,nbr,2026-01-01,2026-09-08,2026,2026,2026,1,DERIVED_2026,Internal Pipeline,Normalized Burn Ratio (NIR-SWIR2)/(NIR+SWIR2)
+14,Sentinel-2 Derived Multispectral Indices,vegetation_fraction,2026-01-01,2026-09-08,2026,2026,2026,1,DERIVED_2026,Internal Pipeline,Fractional Vegetation Cover (FVC)
+7,ISRIC SoilGrids 250m Global Grids,soil_ph,2020-01-01,2020-12-31,2020,2020,2026,0,STATIC_BASELINE,ISRIC World Soil Information,Soil pH in H2O at 0-30cm
+7,ISRIC SoilGrids 250m Global Grids,soil_organic_carbon,2020-01-01,2020-12-31,2020,2020,2026,0,STATIC_BASELINE,ISRIC World Soil Information,Soil organic carbon stock dg/kg
+7,ISRIC SoilGrids 250m Global Grids,soil_clay_pct,2020-01-01,2020-12-31,2020,2020,2026,0,STATIC_BASELINE,ISRIC World Soil Information,Clay fraction % (0-30cm)
+7,ISRIC SoilGrids 250m Global Grids,soil_sand_pct,2020-01-01,2020-12-31,2020,2020,2026,0,STATIC_BASELINE,ISRIC World Soil Information,Sand fraction % (0-30cm)
+7,ISRIC SoilGrids 250m Global Grids,soil_silt_pct,2020-01-01,2020-12-31,2020,2020,2026,0,STATIC_BASELINE,ISRIC World Soil Information,Silt fraction % (0-30cm)
+7,ISRIC SoilGrids 250m Global Grids,soil_bulk_density,2020-01-01,2020-12-31,2020,2020,2026,0,STATIC_BASELINE,ISRIC World Soil Information,Fine earth bulk density cg/cm3
+7,ISRIC SoilGrids 250m Global Grids,soil_water_capacity,2020-01-01,2020-12-31,2020,2020,2026,0,STATIC_BASELINE,ISRIC World Soil Information,Available water capacity volumetric fraction
+8,ESA WorldCover 10m Global Land Cover,landcover_code,2021-01-01,2021-12-31,2021,2022,2026,0,LATEST_AVAILABLE_NOT_2026,ESA / VITO Remote Sensing,11 discrete land cover categories
+9,HydroSHEDS River Network,distance_to_river_m,2000-01-01,2000-12-31,2000,2018,2026,0,STATIC_BASELINE,WWF / USGS HydroSHEDS,Euclidean distance to nearest stream channel
+10,JRC Global Surface Water Occurrence,distance_to_water_m,1984-03-16,2021-12-31,2021,2022,2026,0,LATEST_AVAILABLE_NOT_2026,EC JRC Surface Water,Distance to surface water body
+10,JRC Global Surface Water Occurrence,water_occurrence_pct,1984-03-16,2021-12-31,2021,2022,2026,0,LATEST_AVAILABLE_NOT_2026,EC JRC Surface Water,Surface water occurrence frequency %
+9,HydroSHEDS River Network,drainage_density,2000-01-01,2000-12-31,2000,2018,2026,0,STATIC_BASELINE,WWF / USGS HydroSHEDS,Stream length per km2
+13,MoEFCC Protected Area Network / FSI,forest_cover_pct,2022-01-01,2023-12-31,2023,2023,2026,0,LATEST_AVAILABLE_NOT_2026,WII / FSI India,Canopy crown density %
+13,MoEFCC Protected Area Network of India,protected_area_flag,2022-01-01,2023-12-31,2023,2023,2026,0,LATEST_AVAILABLE_NOT_2026,WII ENVIS Centre,"Binary indicator (1=inside PA, 0=outside)"
+13,MoEFCC Protected Area Network of India,distance_to_protected_area_m,2022-01-01,2023-12-31,2023,2023,2026,0,LATEST_AVAILABLE_NOT_2026,WII ENVIS Centre,Distance to nearest National Park / Wildlife Sanctuary
+14,Sentinel NER Pipeline,flood_history_flag,2026-01-01,2026-09-08,2026,2026,2026,1,DERIVED_2026,Internal Pipeline,Feature generated within NER 2026 pipeline
+14,Sentinel NER Pipeline,landslide_history_flag,2026-01-01,2026-09-08,2026,2026,2026,1,DERIVED_2026,Internal Pipeline,Feature generated within NER 2026 pipeline
+11,NASA Global Landslide Catalog / GSI Bhukosh,nearest_landslide_distance_km,2026-01-01,2026-09-08,2026,2026,2026,1,OBSERVED_2026,NASA GLC / GSI Bhukosh,Euclidean distance to nearest documented landslide event in km
+14,MoRTH & OpenStreetMap NER National Highway Network,distance_to_road_m,2024-01-01,2024-12-31,2024,2024,2026,0,STATIC_BASELINE,MoRTH Geoportal / OSM,Euclidean distance to nearest National/State Highway in meters
+14,MoRTH & OpenStreetMap NER National Highway Network,road_proximity_flag,2024-01-01,2024-12-31,2024,2024,2026,0,STATIC_BASELINE,MoRTH Geoportal / OSM,"Binary indicator (1=within 500m road cut zone, 0=outside)"
+14,MoRTH & OpenStreetMap NER National Highway Network,road_cut_slope_hazard,2026-01-01,2026-09-08,2026,2026,2026,1,DERIVED_2026,Internal Pipeline,Anthropogenic toe-excavation hazard flag (near road & slope >= 25 deg)
+11,GSI Bhukosh / CWC Flood Records,target_flood_risk,2026-01-01,2026-08-31,2026,2026,2026,1,OBSERVED_2026,GSI Bhukosh / NDMA / ASDMA,Observed 2026 monsoon flood inundation severity (0-3)
+11,GSI Bhukosh Verified Landslide Database,target_landslide_risk,2026-01-01,2026-08-31,2026,2026,2026,1,OBSERVED_2026,GSI Bhukosh Verified Incidents,Ground-truthed 2026 landslide hazard severity tier (0-3)
+14,Sentinel NER Pipeline,data_quality_score,2026-01-01,2026-09-08,2026,2026,2026,1,DERIVED_2026,Internal Pipeline,Feature generated within NER 2026 pipeline

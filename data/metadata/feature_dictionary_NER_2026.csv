@@ -1,0 +1,50 @@
+feature_id,feature_name,description,data_type,unit,source_dataset_id,spatial_resolution,temporal_resolution,minimum,maximum,missing_value,encoding,normalization,ml_role
+1,sample_id,Unique deterministic alphanumeric record identifier,string,none,14,250m,per_observation,none,none,NOT_NULL,string_id,none,identifier
+2,grid_id,Standardized 250m spatial cell identifier (NER-G250M-X_Y),string,none,12,250m,static_grid,none,none,NOT_NULL,string_id,none,identifier
+3,date,Calendar observation date for time-varying environmental metrics,date,YYYY-MM-DD,14,250m,daily,2026-01-01,2026-12-31,NOT_NULL,iso_date,none,temporal
+4,year,Four-digit observation calendar year,integer,years,14,none,annual,2026,2026,NOT_NULL,integer,none,temporal
+5,month,Calendar month index (1 to 12),integer,months,14,none,monthly,1,12,NOT_NULL,integer,cyclical_sin_cos,temporal
+6,state_code,Numerical state code for the 8 NER states (1 to 8),integer,code,12,administrative,static,1,8,NOT_NULL,integer_lookup,none,categorical
+7,district_code,Authoritative Census/NER district numerical code,integer,code,12,administrative,static,101,808,NOT_NULL,integer_lookup,none,categorical
+8,latitude,WGS84 geographic latitude of grid cell centroid,float,degrees_north,12,250m,static,21.5,29.5,NOT_NULL,coordinate,none,coordinate
+9,longitude,WGS84 geographic longitude of grid cell centroid,float,degrees_east,12,250m,static,88.0,97.5,NOT_NULL,coordinate,none,coordinate
+10,elevation_m,Terrain elevation above mean sea level from NASA SRTM 30m,float,meters,2,30m_zonal_mean,static,-50.0,7500.0,MEDIAN,continuous,StandardScaler,feature
+11,slope_deg,Topographic slope inclination gradient derived from DEM,float,degrees,2,30m_derived,static,0.0,90.0,MEDIAN,continuous,StandardScaler,feature
+12,aspect_deg,Compass azimuth direction of downhill slope gradient,float,degrees,2,30m_derived,static,0.0,360.0,MEDIAN,continuous,cyclical_sin_cos,feature
+13,terrain_ruggedness,Terrain Ruggedness Index (TRI standard deviation of elevation),float,index,2,30m_derived,static,0.0,1500.0,MEDIAN,continuous,StandardScaler,feature
+14,relief_m,Maximum minus minimum elevation in the local catchment neighborhood,float,meters,2,30m_derived,static,0.0,3500.0,MEDIAN,continuous,StandardScaler,feature
+15,rainfall_1d_mm,24-hour antecedent rainfall accumulation,float,mm,4,25km_downscaled,daily,0.0,1200.0,ZERO,continuous,StandardScaler,feature
+16,rainfall_3d_mm,3-day rolling antecedent rainfall accumulation,float,mm,4,25km_downscaled,rolling_3d,0.0,2000.0,ZERO,continuous,StandardScaler,feature
+17,rainfall_7d_mm,7-day rolling antecedent rainfall accumulation,float,mm,4,25km_downscaled,rolling_7d,0.0,3500.0,ZERO,continuous,StandardScaler,feature
+18,rainfall_30d_mm,30-day rolling antecedent rainfall accumulation,float,mm,4,25km_downscaled,rolling_30d,0.0,7000.0,ZERO,continuous,StandardScaler,feature
+19,rainfall_90d_mm,90-day seasonal antecedent monsoon accumulation,float,mm,4,25km_downscaled,rolling_90d,0.0,15000.0,ZERO,continuous,StandardScaler,feature
+20,temperature_mean_c,Daily mean near-surface 2m air temperature,float,celsius,6,9km_downscaled,daily,-25.0,50.0,MEDIAN,continuous,StandardScaler,feature
+21,temperature_max_c,Daily maximum 2m air temperature,float,celsius,6,9km_downscaled,daily,-20.0,55.0,MEDIAN,continuous,StandardScaler,feature
+22,temperature_min_c,Daily minimum 2m air temperature,float,celsius,6,9km_downscaled,daily,-35.0,40.0,MEDIAN,continuous,StandardScaler,feature
+23,temperature_range_c,Diurnal temperature range (Tmax minus Tmin),float,celsius,6,9km_downscaled,daily,0.0,35.0,MEDIAN,continuous,StandardScaler,feature
+24,humidity_pct,Daily mean relative atmospheric humidity,float,percent,6,9km_downscaled,daily,5.0,100.0,MEDIAN,continuous,MinMaxScaler,feature
+25,ndvi,Normalized Difference Vegetation Index from Sentinel-2 (B8-B4)/(B8+B4),float,index,14,10m_zonal_mean,5-day,-1.0,1.0,MEDIAN,continuous,MinMaxScaler,feature
+26,evi,Enhanced Vegetation Index resistant to atmospheric aerosols,float,index,14,10m_zonal_mean,5-day,-1.0,2.5,MEDIAN,continuous,StandardScaler,feature
+27,ndwi,Normalized Difference Water Index from Sentinel-2 (B3-B8)/(B3+B8),float,index,14,10m_zonal_mean,5-day,-1.0,1.0,MEDIAN,continuous,StandardScaler,feature
+28,nbr,Normalized Burn Ratio for canopy disturbance and fire scars,float,index,14,20m_zonal_mean,5-day,-1.0,1.0,MEDIAN,continuous,StandardScaler,feature
+29,vegetation_fraction,Fractional vegetation cover calculated from NDVI soil-veg scaling,float,fraction,14,10m_derived,5-day,0.0,1.0,MEDIAN,continuous,MinMaxScaler,feature
+30,soil_ph,Soil pH in water (0-30cm depth) from ISRIC SoilGrids,float,pH,7,250m,static,3.0,10.0,MEDIAN,continuous,StandardScaler,feature
+31,soil_organic_carbon,Soil organic carbon stock in fine earth fraction,float,g/kg,7,250m,static,0.0,250.0,MEDIAN,continuous,StandardScaler,feature
+32,soil_clay_pct,Volumetric fraction of clay particles (<0.002mm),float,percent,7,250m,static,0.0,100.0,MEDIAN,continuous,MinMaxScaler,feature
+33,soil_sand_pct,Volumetric fraction of sand particles (0.05-2.0mm),float,percent,7,250m,static,0.0,100.0,MEDIAN,continuous,MinMaxScaler,feature
+34,soil_silt_pct,Volumetric fraction of silt particles (0.002-0.05mm),float,percent,7,250m,static,0.0,100.0,MEDIAN,continuous,MinMaxScaler,feature
+35,soil_bulk_density,Bulk density of the fine earth fraction,float,cg/cm3,7,250m,static,50.0,200.0,MEDIAN,continuous,StandardScaler,feature
+36,soil_water_capacity,Available water capacity until wilting point (WWP),float,cm3/cm3,7,250m,static,0.0,0.50,MEDIAN,continuous,StandardScaler,feature
+37,landcover_code,ESA WorldCover 10m numerical categorical class (1 to 11),integer,code,8,10m_majority,static,1,11,MODE,one_hot_or_integer,none,categorical
+38,distance_to_river_m,Euclidean projected metric distance to nearest HydroSHEDS stream,float,meters,9,vector_derived,static,0.0,100000.0,MEDIAN,continuous,StandardScaler,feature
+39,distance_to_water_m,Euclidean metric distance to permanent or seasonal surface water,float,meters,10,30m_derived,static,0.0,100000.0,MEDIAN,continuous,StandardScaler,feature
+40,water_occurrence_pct,JRC long-term surface water detection occurrence percentage,float,percent,10,30m_zonal_mean,static,0.0,100.0,ZERO,continuous,MinMaxScaler,feature
+41,drainage_density,Catchment channel streamline length per unit grid square area,float,km/km2,9,500m_derived,static,0.0,25.0,MEDIAN,continuous,StandardScaler,feature
+42,forest_cover_pct,Tree canopy density percentage from FSI / Global Forest Watch,float,percent,13,30m_zonal_mean,static,0.0,100.0,MEDIAN,continuous,MinMaxScaler,feature
+43,protected_area_flag,Binary flag indicating grid cell intersects a National Park/Sanctuary,integer,flag,13,vector_overlay,static,0,1,ZERO,binary,none,categorical
+44,distance_to_protected_area_m,Metric distance from grid centroid to nearest designated protected polygon,float,meters,13,vector_derived,static,0.0,250000.0,MEDIAN,continuous,StandardScaler,feature
+45,flood_history_flag,Historical flood inundation recorded in cell (CWC/NDMA),integer,flag,10,historical_events,static,0,1,ZERO,binary,none,feature
+46,landslide_history_flag,Historical landslide rupture verified in cell (GSI Bhukosh),integer,flag,11,historical_events,static,0,1,ZERO,binary,none,feature
+47,target_flood_risk,Authoritative flood susceptibility class (0=Low, 1=Mod, 2=High, 3=VeryHigh),integer,class,10,multi-source,ground_truth,0,3,NULL,integer_multiclass,none,target
+48,target_landslide_risk,Authoritative landslide susceptibility class (0=Low, 1=Mod, 2=High, 3=VeryHigh),integer,class,11,multi-source,ground_truth,0,3,NULL,integer_multiclass,none,target
+49,data_quality_score,Automated composite data quality index based on freshness and missingness,float,score,14,composite,per_observation,0.0,1.0,NOT_NULL,continuous,none,metadata

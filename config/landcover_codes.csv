@@ -1,0 +1,12 @@
+landcover_code,landcover_label,description,esa_worldcover_class
+1,Tree_Cover,Dense forest and woodland canopy,10
+2,Shrubland,Woody perennial shrubs and scrub vegetation,20
+3,Grassland,Natural grasslands and savannah grazing areas,30
+4,Cropland,Cultivated agricultural lands and paddy terraces,40
+5,Builtup,Urban infrastructure buildings and transport corridors,50
+6,Bare_Sparse,Exposed rock scarps gravel bars and bare soil,60
+7,Snow_Ice,Perennial snow cover glaciers and high-altitude ice,70
+8,Permanent_Water,Lakes rivers reservoirs and open surface water bodies,80
+9,Herbaceous_Wetland,Seasonally flooded marshes bogs and reedbeds,90
+10,Mangroves,Tidal saline wetlands and brackish river estuarine,95
+11,Moss_Lichen,High-altitude alpine tundra moss and lichen communities,100

@@ -37,12 +37,24 @@ import {
   ChevronDown,
   ChevronRight,
   SlidersHorizontal,
+  Bot,
+  Sparkles,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/auth";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation, useI18nDomSync } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
+import {
+  Role,
+  Permission,
+  ROLE_DISPLAY_NAMES,
+  ROLE_DEFAULT_ROUTES,
+  hasPermission,
+  normalizeRole,
+} from "@/lib/rbac";
 import { SentinelMegaMenu } from "./SentinelMegaMenu";
 import { CookieConsentBanner } from "./CookieConsentBanner";
+import { DisasterCopilotWidget } from "@/components/chat/DisasterCopilotWidget";
+import { LocationRiskSentinel } from "@/components/alerts/LocationRiskSentinel";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TYPE DEFINITIONS
@@ -57,6 +69,7 @@ export interface NavItem {
   translationKey: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  permission: Permission;
   badge?: string;
   badgeType?: "green" | "amber" | "blue" | "purple" | "red";
   description?: string;
@@ -88,8 +101,9 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         label: "Command Center",
         translationKey: "nav.commandCenter",
-        href: "/",
+        href: "/command-center",
         icon: ShieldAlert,
+        permission: Permission.VIEW_COMMAND_CENTER,
         description: "National emergency command center & radar",
       },
       {
@@ -97,6 +111,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.spatialMap",
         href: "/map",
         icon: Compass,
+        permission: Permission.VIEW_SPATIAL_MAP,
         badge: "3D GIS",
         badgeType: "blue",
         description: "Topological slope units & 3D terrain",
@@ -106,9 +121,20 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.creepWatch",
         href: "/creep-watch",
         icon: Radio,
+        permission: Permission.VIEW_CREEP_WATCH,
         badge: "InSAR",
         badgeType: "purple",
         description: "Sentinel-1 satellite surface deformation",
+      },
+      {
+        label: "Live Weather",
+        translationKey: "nav.weather",
+        href: "/weather",
+        icon: CloudRain,
+        permission: Permission.VIEW_LIVE_WEATHER,
+        badge: "7-Day",
+        badgeType: "blue",
+        description: "IMD Doppler radar & 7-day synoptic forecast",
       },
     ],
   },
@@ -125,6 +151,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.earlyWarning",
         href: "/early-warning",
         icon: AlertTriangle,
+        permission: Permission.VIEW_EARLY_WARNING,
         badge: "96.4%",
         badgeType: "amber",
         description: "GSI & IIT Mandi 4-tier threat matrix",
@@ -134,6 +161,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.hydrology",
         href: "/hydrology",
         icon: CloudRain,
+        permission: Permission.VIEW_SATELLITE_HYDROLOGY,
         badge: "GPM IMERG",
         badgeType: "blue",
         description: "NASA LHASA v2 GPM rainfall & SMAP moisture",
@@ -143,6 +171,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.geotech",
         href: "/geotech",
         icon: Gauge,
+        permission: Permission.VIEW_SUBSURFACE_GEOTECH,
         badge: "Fs 1.08",
         badgeType: "amber",
         description: "KIGAM slope stability & Amrita piezometers",
@@ -152,9 +181,20 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.riskEngine",
         href: "/risk",
         icon: Activity,
+        permission: Permission.VIEW_RISK_ENGINE_OPERATIONAL,
         badge: "ML Engine",
         badgeType: "purple",
         description: "Transparent multivariate logistic regression",
+      },
+      {
+        label: "SENTINEL AI",
+        translationKey: "nav.disasterAssistant",
+        href: "/sentinel-ai",
+        icon: Bot,
+        permission: Permission.VIEW_SENTINEL_AI_OPERATIONAL,
+        badge: "Neural AI",
+        badgeType: "green",
+        description: "Autonomous multi-modal intelligence & Gemini copilot",
       },
     ],
   },
@@ -171,6 +211,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.highways",
         href: "/highways",
         icon: Truck,
+        permission: Permission.VIEW_HIGHWAY_CORRIDORS,
         badge: "NH-54",
         badgeType: "amber",
         description: "BRO Pushpak highway status & scarp inventory",
@@ -180,6 +221,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.consequenceIntel",
         href: "/consequences",
         icon: Layers,
+        permission: Permission.VIEW_CONSEQUENCE_INTEL,
         badge: "Graph",
         badgeType: "purple",
         description: "Cascading lifeline failure dependency graphs",
@@ -199,6 +241,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.operations",
         href: "/operations",
         icon: ShieldCheck,
+        permission: Permission.VIEW_OPERATIONS,
         badge: "3",
         badgeType: "green",
         description: "Human-authorized dual-custody action queue",
@@ -208,6 +251,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.warningLedger",
         href: "/ledger",
         icon: FileCheck2,
+        permission: Permission.VIEW_WARNING_LEDGER,
         badge: "Audit",
         badgeType: "purple",
         description: "Cryptographically sealed immutable warning log",
@@ -217,6 +261,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.alertsDelivery",
         href: "/alerts",
         icon: Bell,
+        permission: Permission.VIEW_ALERTS,
         badge: "CAP/SMS",
         badgeType: "blue",
         description: "Multi-channel CAP broadcast & citizen alerts",
@@ -226,6 +271,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.sensors",
         href: "/sensors",
         icon: Cpu,
+        permission: Permission.VIEW_FIELD_SENSORS,
         badge: "WSN Mesh",
         badgeType: "green",
         description: "LoRa tiltmeters, rain gauges & piezometer mesh",
@@ -235,6 +281,7 @@ export const NAV_GROUPS: NavGroup[] = [
         translationKey: "nav.community",
         href: "/community",
         icon: Users,
+        permission: Permission.VIEW_FIELD_COMMUNITY,
         badge: "Reports",
         badgeType: "purple",
         description: "Decentralized crowdsourced ground-truth reports",
@@ -243,15 +290,15 @@ export const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-const NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
+export const NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
 
-const PRIMARY_TOP_LINKS: NavItem[] = [
-  { label: "Command Center",   translationKey: "nav.commandCenter",  href: "/",            icon: ShieldAlert },
-  { label: "Spatial Map",      translationKey: "nav.spatialMap",     href: "/map",          icon: Compass },
-  { label: "Creep Watch",      translationKey: "nav.creepWatch",     href: "/creep-watch",  icon: Radio },
-  { label: "Warning Ledger",   translationKey: "nav.warningLedger",  href: "/ledger",       icon: FileCheck2 },
-  { label: "Field & Community", translationKey: "nav.community",     href: "/community",    icon: Users },
-  { label: "Alerts & Delivery", translationKey: "nav.alertsDelivery", href: "/alerts",      icon: Bell },
+export const PRIMARY_TOP_LINKS: NavItem[] = [
+  { label: "Command Center",   translationKey: "nav.commandCenter",  href: "/command-center", icon: ShieldAlert, permission: Permission.VIEW_COMMAND_CENTER },
+  { label: "Spatial Map",      translationKey: "nav.spatialMap",     href: "/map",          icon: Compass,     permission: Permission.VIEW_SPATIAL_MAP },
+  { label: "Creep Watch",      translationKey: "nav.creepWatch",     href: "/creep-watch",  icon: Radio,       permission: Permission.VIEW_CREEP_WATCH },
+  { label: "Warning Ledger",   translationKey: "nav.warningLedger",  href: "/ledger",       icon: FileCheck2,  permission: Permission.VIEW_WARNING_LEDGER },
+  { label: "Field & Community", translationKey: "nav.community",     href: "/community",    icon: Users,       permission: Permission.VIEW_FIELD_COMMUNITY },
+  { label: "Alerts & Delivery", translationKey: "nav.alertsDelivery", href: "/alerts",      icon: Bell,        permission: Permission.VIEW_ALERTS },
 ];
 
 const THEMES = [
@@ -334,9 +381,97 @@ export function SentinelShell({ children }: SentinelShellProps) {
   const { lang, setLang, t } = useTranslation();
   const { theme, setTheme } = useTheme();
 
+  // Canonical RBAC: Filter navigation groups and modules dynamically based on user role & permissions
+  const filteredNavGroups = React.useMemo(() => {
+    if (normalizeRole(user?.role) === Role.USER) {
+      return [
+        {
+          id: "public-services",
+          title: "Public Hazard Intelligence",
+          translationKey: "nav.group.publicServices",
+          icon: Compass,
+          badge: "PUBLIC",
+          badgeType: "blue" as const,
+          items: [
+            {
+              label: "Spatial Map",
+              translationKey: "nav.spatialMap",
+              href: "/map",
+              icon: Compass,
+              permission: Permission.VIEW_SPATIAL_MAP,
+              badge: "3D GIS",
+              badgeType: "blue" as const,
+              description: "Topological slope units & 3D terrain",
+            },
+            {
+              label: "Live Weather",
+              translationKey: "nav.weather",
+              href: "/weather",
+              icon: CloudRain,
+              permission: Permission.VIEW_LIVE_WEATHER,
+              badge: "IMD",
+              badgeType: "blue" as const,
+              description: "IMD Doppler radar & 7-day synoptic forecast",
+            },
+            {
+              label: "Field & Community",
+              translationKey: "nav.community",
+              href: "/community",
+              icon: Users,
+              permission: Permission.VIEW_FIELD_COMMUNITY,
+              badge: "Crowdsource",
+              badgeType: "green" as const,
+              description: "Ground-truth citizen reports & community observations",
+            },
+            {
+              label: "Alerts & Delivery",
+              translationKey: "nav.alertsDelivery",
+              href: "/alerts",
+              icon: Bell,
+              permission: Permission.VIEW_ALERTS,
+              badge: "Broadcast",
+              badgeType: "amber" as const,
+              description: "Public landslide alerts and disaster advisories",
+            },
+          ],
+        },
+      ];
+    }
+    return NAV_GROUPS.map((group) => ({
+      ...group,
+      items: group.items.filter((item) => hasPermission(user, item.permission)),
+    })).filter((group) => group.items.length > 0);
+  }, [user]);
+
+  const accessibleNavItems = React.useMemo(() => {
+    return filteredNavGroups.flatMap((g) => g.items);
+  }, [filteredNavGroups]);
+
+  // Full-site reactive DOM translation synchronization
+  useI18nDomSync();
+
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== "undefined") {
+      try {
+        const savedSize = localStorage.getItem("sentinel_text_size") as "sm" | "base" | "lg" | null;
+        if (savedSize && (savedSize === "sm" || savedSize === "base" || savedSize === "lg")) {
+          setTextSize(savedSize);
+          document.documentElement.setAttribute("data-text-size", savedSize);
+        }
+      } catch {}
+    }
   }, []);
+
+  const handleSetTextSize = (newSize: "sm" | "base" | "lg") => {
+    setTextSize(newSize);
+    if (typeof window !== "undefined") {
+      document.documentElement.setAttribute("data-text-size", newSize);
+      try {
+        localStorage.setItem("sentinel_text_size", newSize);
+      } catch {}
+    }
+  };
 
   useEffect(() => {
     const fmt: Intl.DateTimeFormatOptions = {
@@ -358,9 +493,33 @@ export function SentinelShell({ children }: SentinelShellProps) {
     return () => clearInterval(id);
   }, []);
 
-
   const textSizeClass =
     textSize === "sm" ? "text-xs" : textSize === "lg" ? "text-base" : "";
+
+  if (pathname === "/login") {
+    return (
+      <div
+        className={`min-h-screen flex flex-col antialiased selection:bg-blue-100 selection:text-gov-blue transition-colors bg-[#F8FAFC] dark:bg-[#030712] ${textSizeClass}`}
+      >
+        <a href="#main-content" className="skip-to-content">
+          {t("skip.content", "Skip to main content")}
+        </a>
+        <TricolorRibbon />
+        <GovernanceBar
+          t={t}
+          textSize={textSize}
+          setTextSize={handleSetTextSize}
+          theme={theme}
+          setTheme={setTheme}
+          lang={lang}
+          setLang={setLang}
+        />
+        <main id="main-content" className="flex-1 flex flex-col">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -378,7 +537,7 @@ export function SentinelShell({ children }: SentinelShellProps) {
       <GovernanceBar
         t={t}
         textSize={textSize}
-        setTextSize={setTextSize}
+        setTextSize={handleSetTextSize}
         theme={theme}
         setTheme={setTheme}
         lang={lang}
@@ -438,6 +597,15 @@ export function SentinelShell({ children }: SentinelShellProps) {
             </span>
           </div>
 
+          {/* Operational Role Badge Indicator */}
+          {mounted && isAuthenticated && user && (
+            <div className="hidden sm:flex items-center">
+              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-gov-blue dark:bg-cyan-950/80 dark:text-cyan-300 border border-blue-200 dark:border-cyan-800 whitespace-nowrap shadow-2xs font-sans">
+                {ROLE_DISPLAY_NAMES[user.role] || user.role}
+              </span>
+            </div>
+          )}
+
           {/* Sign In / User Badge */}
           <UserBadge
             mounted={mounted}
@@ -456,29 +624,119 @@ export function SentinelShell({ children }: SentinelShellProps) {
       >
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between relative gap-3">
           <div className="flex items-center space-x-1 py-1 min-w-0">
-            {/* Primary Command Center Link */}
-            <Link
-              href="/"
-              className={`sentinel-nav-link flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 ${
-                pathname === "/"
-                  ? "active bg-gov-blue-dark text-amber-300 border-b-2 border-gov-saffron font-bold shadow-inner"
-                  : "text-white/95 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <ShieldAlert className="h-4 w-4 text-amber-300 shrink-0" />
-              <span>{t("nav.commandCenter", "Command Center")}</span>
-            </Link>
+            {normalizeRole(user?.role) === Role.USER ? (
+              <>
+                {/* User Mode: Exclusively render Spatial Map, Live Weather, Field & Community, and Alerts & Delivery */}
+                <Link
+                  href="/map"
+                  className={`sentinel-nav-link flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 ${
+                    pathname === "/map"
+                      ? "active bg-gov-blue-dark text-amber-300 border-b-2 border-gov-saffron font-bold shadow-inner"
+                      : "text-white/95 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <Compass className="h-4 w-4 text-cyan-300 shrink-0" />
+                  <span>{t("nav.spatialMap", "Spatial Map")}</span>
+                </Link>
 
-            {/* Mega Dropdown Menus (Multi-Column Domain Clusters) */}
-            <div className="hidden lg:block ml-1 min-w-0">
-              <SentinelMegaMenu />
-            </div>
+                <Link
+                  href="/weather"
+                  className={`sentinel-nav-link flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 ${
+                    pathname === "/weather"
+                      ? "active bg-gov-blue-dark text-amber-300 border-b-2 border-gov-saffron font-bold shadow-inner"
+                      : "text-white/95 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <CloudRain className="h-4 w-4 text-sky-300 shrink-0" />
+                  <span>{t("nav.weather", "Live Weather")}</span>
+                </Link>
+
+                <Link
+                  href="/community"
+                  className={`sentinel-nav-link flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 ${
+                    pathname === "/community"
+                      ? "active bg-gov-blue-dark text-amber-300 border-b-2 border-gov-saffron font-bold shadow-inner"
+                      : "text-white/95 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <Users className="h-4 w-4 text-emerald-300 shrink-0" />
+                  <span>{t("nav.community", "Field & Community")}</span>
+                </Link>
+
+                <Link
+                  href="/alerts"
+                  className={`sentinel-nav-link flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 ${
+                    pathname === "/alerts"
+                      ? "active bg-gov-blue-dark text-amber-300 border-b-2 border-gov-saffron font-bold shadow-inner"
+                      : "text-white/95 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <Bell className="h-4 w-4 text-amber-300 shrink-0" />
+                  <span>{t("nav.alertsDelivery", "Alerts & Delivery")}</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                {/* 1. Primary Starting Page: SENTINEL AI (Rendered if permitted for role) */}
+                {hasPermission(user, Permission.VIEW_SENTINEL_AI_OPERATIONAL) && (
+                  <Link
+                    href="/sentinel-ai"
+                    className={`sentinel-nav-link flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 ${
+                      pathname === "/" || pathname === "/sentinel-ai"
+                        ? "active bg-gov-blue-dark text-amber-300 border-b-2 border-gov-saffron font-bold shadow-inner"
+                        : "text-white/95 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <Sparkles className="h-4 w-4 text-emerald-400 shrink-0" />
+                    <span className="font-bold">SENTINEL AI</span>
+                    <span className="px-1.5 py-0.2 rounded text-[9px] font-sans font-extrabold uppercase bg-emerald-500/25 text-emerald-300 border border-emerald-400/40">
+                      AI
+                    </span>
+                  </Link>
+                )}
+
+                {/* 2. Secondary: Command Center (Rendered if permitted for role) */}
+                {hasPermission(user, Permission.VIEW_COMMAND_CENTER) && (
+                  <Link
+                    href="/command-center"
+                    className={`sentinel-nav-link flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 ${
+                      pathname === "/command-center"
+                        ? "active bg-gov-blue-dark text-amber-300 border-b-2 border-gov-saffron font-bold shadow-inner"
+                        : "text-white/95 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <ShieldAlert className="h-4 w-4 text-amber-300 shrink-0" />
+                    <span>{t("nav.commandCenter", "Command Center")}</span>
+                  </Link>
+                )}
+
+                {/* 3. Spatial Map Top Tab (For roles without Command Center / Sentinel AI) */}
+                {!hasPermission(user, Permission.VIEW_COMMAND_CENTER) && hasPermission(user, Permission.VIEW_SPATIAL_MAP) && (
+                  <Link
+                    href="/map"
+                    className={`sentinel-nav-link flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 ${
+                      pathname === "/map"
+                        ? "active bg-gov-blue-dark text-amber-300 border-b-2 border-gov-saffron font-bold shadow-inner"
+                        : "text-white/95 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <Compass className="h-4 w-4 text-cyan-300 shrink-0" />
+                    <span>{t("nav.spatialMap", "Spatial Map")}</span>
+                  </Link>
+                )}
+
+                {/* Mega Dropdown Menus (Multi-Column Domain Clusters) */}
+                <div className="hidden lg:block ml-1 min-w-0">
+                  <SentinelMegaMenu />
+                </div>
+              </>
+            )}
           </div>
 
           {/* Quick Disaster Helpline in Nav Bar */}
           <div className="flex items-center space-x-1.5 text-xs text-amber-300 font-bold pr-2 shrink-0 whitespace-nowrap">
             <Phone className="h-3.5 w-3.5 text-gov-saffron shrink-0" />
-            <span>NDMA Helpline: 1078</span>
+            <span>{t("nav.helpline", "NDMA Helpline: 1078")}</span>
           </div>
         </div>
       </nav>
@@ -587,7 +845,7 @@ export function SentinelShell({ children }: SentinelShellProps) {
                 <option value="" disabled>
                   ⚡ Jump to Feature...
                 </option>
-                {NAV_GROUPS.map((group) => (
+                {filteredNavGroups.map((group) => (
                   <optgroup key={group.id} label={group.title}>
                     {group.items.map((item) => (
                       <option key={item.href} value={item.href}>
@@ -602,7 +860,7 @@ export function SentinelShell({ children }: SentinelShellProps) {
 
             {/* Expand / Collapse All Controls */}
             <div className="flex items-center justify-between px-1 text-[10px] font-semibold text-slate-400">
-              <span>Features ({NAV_ITEMS.length})</span>
+              <span>Features ({accessibleNavItems.length})</span>
               <button
                 type="button"
                 onClick={toggleAllGroups}
@@ -615,7 +873,7 @@ export function SentinelShell({ children }: SentinelShellProps) {
 
           {/* Grouped Collapsible Accordion Navigation */}
           <nav className="space-y-1.5 flex-1 overflow-y-auto pr-0.5">
-            {NAV_GROUPS.map((group) => {
+            {filteredNavGroups.map((group) => {
               const isOpen = expandedGroups[group.id] !== false;
               const hasActiveItem = group.items.some((i) => pathname === i.href);
               const GroupIcon = group.icon;
@@ -728,6 +986,7 @@ export function SentinelShell({ children }: SentinelShellProps) {
             setTheme={setTheme}
             lang={lang}
             setLang={setLang}
+            navGroups={filteredNavGroups}
           />
         )}
 
@@ -739,7 +998,7 @@ export function SentinelShell({ children }: SentinelShellProps) {
           tabIndex={-1}
         >
           {children}
-          <GovFooter t={t} />
+          <GovFooter t={t} user={user} />
         </main>
       </div>
 
@@ -747,10 +1006,13 @@ export function SentinelShell({ children }: SentinelShellProps) {
       <MobileBottomNav
         pathname={pathname}
         t={t}
+        user={user}
         onOpenMenu={() => setMobileMenuOpen(true)}
       />
 
+      <DisasterCopilotWidget />
       <CookieConsentBanner />
+      <LocationRiskSentinel />
     </div>
   );
 }
@@ -927,7 +1189,7 @@ function UserBadge({
 }: {
   mounted: boolean;
   isAuthenticated: boolean;
-  user: { full_name: string; role: string } | null;
+  user: { full_name: string; role: string; organization_name?: string | null; organization_id?: string | null; email?: string } | null;
   logout: () => void;
   t: (key: string, fallback?: string) => string;
 }) {
@@ -992,7 +1254,10 @@ function UserBadge({
         .slice(0, 2)
         .join("")
         .toUpperCase()
-    : "PA";
+    : "SN";
+
+  const roleLabel = ROLE_DISPLAY_NAMES[user.role] || user.role;
+  const orgLabel = user.organization_name || user.organization_id || "Sentinel NER Agency";
 
   return (
     <div ref={dropdownRef} className="relative flex items-center pl-2 border-l border-slate-200 dark:border-slate-800">
@@ -1027,30 +1292,37 @@ function UserBadge({
         <div
           role="menu"
           aria-orientation="vertical"
-          className="absolute right-0 top-full mt-2 w-64 rounded-xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200 dark:border-slate-800 p-2.5 z-50 text-slate-800 dark:text-slate-200 animate-in fade-in slide-in-from-top-1 duration-150"
+          style={{ width: "min(360px, calc(100vw - 1.5rem))" }}
+          className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-w-[calc(100vw-1.5rem)] rounded-xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200 dark:border-slate-800 p-3.5 z-50 text-slate-800 dark:text-slate-200 animate-in fade-in slide-in-from-top-1 duration-150 font-sans"
         >
           {/* User Details Header */}
-          <div className="flex items-center gap-3 px-2 py-2">
-            <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-[#0a3d52] via-[#0d5672] to-[#12809e] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs border border-teal-300/30">
+          <div className="flex items-start gap-3 px-1 py-1">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#0a3d52] via-[#0d5672] to-[#12809e] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs border border-teal-300/30 mt-0.5">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
+              <div className="font-bold text-sm text-slate-900 dark:text-white leading-snug">
                 {user.full_name}
               </div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-gov-blue dark:bg-cyan-950 dark:text-cyan-300 border border-blue-200 dark:border-cyan-800">
-                  {user.role}
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-normal leading-relaxed mt-1">
+                {orgLabel}
+              </div>
+              <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-gov-blue dark:bg-cyan-950/80 dark:text-cyan-300 border border-blue-200 dark:border-cyan-800 whitespace-nowrap font-sans">
+                  {roleLabel}
                 </span>
-                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium whitespace-nowrap font-sans">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   Active
+                </span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono whitespace-nowrap ml-auto">
+                  {user.role}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="my-1.5 border-t border-slate-100 dark:border-slate-800" />
+          <div className="my-2 border-t border-slate-100 dark:border-slate-800" />
 
           {/* Sign Out Option */}
           <button
@@ -1060,7 +1332,7 @@ function UserBadge({
               setIsOpen(false);
               logout();
             }}
-            className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+            className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
           >
             <LogOut className="h-4 w-4 shrink-0" />
             <span>Sign Out</span>
@@ -1274,6 +1546,7 @@ function MobileDrawer({
   setTheme,
   lang,
   setLang,
+  navGroups,
 }: {
   pathname: string;
   t: (key: string, fallback?: string) => string;
@@ -1282,6 +1555,7 @@ function MobileDrawer({
   setTheme: (t: "light" | "dark" | "high-contrast") => void;
   lang: string;
   setLang: (l: "en" | "hi" | "mizo") => void;
+  navGroups: NavGroup[];
 }) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     surveillance: true,
@@ -1383,7 +1657,7 @@ function MobileDrawer({
               <option value="" disabled>
                 ⚡ Jump to Feature...
               </option>
-              {NAV_GROUPS.map((group) => (
+              {navGroups.map((group) => (
                 <optgroup key={group.id} label={group.title}>
                   {group.items.map((item) => (
                     <option key={item.href} value={item.href}>
@@ -1399,7 +1673,7 @@ function MobileDrawer({
 
         {/* Mobile Grouped Collapsible Accordions */}
         <nav className="space-y-2 flex-1 overflow-y-auto pr-0.5" aria-label="Mobile Navigation Modules">
-          {NAV_GROUPS.map((group) => {
+          {navGroups.map((group) => {
             const isOpen = expandedGroups[group.id] !== false;
             const hasActiveItem = group.items.some((i) => pathname === i.href);
             const GroupIcon = group.icon;
@@ -1521,17 +1795,139 @@ function MobileDrawer({
 function MobileBottomNav({
   pathname,
   t,
+  user,
   onOpenMenu,
 }: {
   pathname: string;
   t: (key: string, fallback?: string) => string;
+  user: any;
   onOpenMenu: () => void;
 }) {
-  const isHome = pathname === "/";
+  const isUserMode = normalizeRole(user?.role) === Role.USER;
+  const canAI = hasPermission(user, Permission.VIEW_SENTINEL_AI_OPERATIONAL);
+  const canCommand = hasPermission(user, Permission.VIEW_COMMAND_CENTER);
+  const canMap = hasPermission(user, Permission.VIEW_SPATIAL_MAP);
+  const canCommunity = hasPermission(user, Permission.VIEW_FIELD_COMMUNITY);
+  const canOperations = hasPermission(user, Permission.VIEW_OPERATIONS);
+  const canAlerts = hasPermission(user, Permission.VIEW_ALERTS);
+
+  const isAI = pathname === "/" || pathname === "/sentinel-ai";
+  const isCommand = pathname === "/command-center";
   const isMap = pathname === "/map";
+  const isWeather = pathname === "/weather";
   const isCommunity = pathname === "/community";
   const isOperations = pathname === "/operations";
-  const isDrawerActive = !isHome && !isMap && !isCommunity && !isOperations;
+  const isAlerts = pathname === "/alerts";
+  const isDrawerActive = !isAI && !isCommand && !isMap && !isCommunity && !isOperations && !isAlerts;
+
+  if (isUserMode) {
+    const isDrawerActiveUser = !isMap && !isWeather && !isCommunity && !isAlerts;
+    return (
+      <nav
+        aria-label="Mobile Bottom Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#070E1E]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.35)] transition-colors"
+        style={{ paddingBottom: "max(0.35rem, env(safe-area-inset-bottom))" }}
+      >
+        <div className="flex items-center justify-around px-1 pt-1.5 pb-1">
+          {/* 1. Spatial Map */}
+          <Link
+            href="/map"
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
+              isMap
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-current={isMap ? "page" : undefined}
+          >
+            {isMap && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <Compass className={`h-5 w-5 mb-0.5 transition-transform ${isMap ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              {t("nav.spatialMap", "3D Map")}
+            </span>
+          </Link>
+
+          {/* 2. Live Weather */}
+          <Link
+            href="/weather"
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
+              isWeather
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-current={isWeather ? "page" : undefined}
+          >
+            {isWeather && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <CloudRain className={`h-5 w-5 mb-0.5 transition-transform ${isWeather ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              {t("nav.weather", "Weather")}
+            </span>
+          </Link>
+
+          {/* 3. Field & Community */}
+          <Link
+            href="/community"
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
+              isCommunity
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-current={isCommunity ? "page" : undefined}
+          >
+            {isCommunity && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <Users className={`h-5 w-5 mb-0.5 transition-transform ${isCommunity ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              {t("nav.community", "Community")}
+            </span>
+          </Link>
+
+          {/* 4. Alerts & Delivery */}
+          <Link
+            href="/alerts"
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
+              isAlerts
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-current={isAlerts ? "page" : undefined}
+          >
+            {isAlerts && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <Bell className={`h-5 w-5 mb-0.5 transition-transform ${isAlerts ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              {t("nav.alertsDelivery", "Alerts")}
+            </span>
+          </Link>
+
+          {/* 5. Menu Drawer Trigger */}
+          <button
+            type="button"
+            onClick={onOpenMenu}
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] cursor-pointer ${
+              isDrawerActiveUser
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-label="Open Full Navigation Menu"
+          >
+            {isDrawerActiveUser && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <Menu className={`h-5 w-5 mb-0.5 transition-transform ${isDrawerActiveUser ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              Menu
+            </span>
+          </button>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav
@@ -1539,84 +1935,131 @@ function MobileBottomNav({
       className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#070E1E]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.35)] transition-colors"
       style={{ paddingBottom: "max(0.35rem, env(safe-area-inset-bottom))" }}
     >
-      <div className="grid grid-cols-5 items-center justify-around px-1 pt-1.5 pb-1">
-        {/* 1. Command Center */}
-        <Link
-          href="/"
-          className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
-            isHome
-              ? "text-gov-blue dark:text-cyan-400 font-bold"
-              : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-          }`}
-          aria-current={isHome ? "page" : undefined}
-        >
-          {isHome && (
-            <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
-          )}
-          <ShieldAlert className={`h-5 w-5 mb-0.5 transition-transform ${isHome ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
-          <span className="text-[10px] tracking-tight truncate max-w-[56px]">
-            {t("nav.commandCenter", "Command")}
-          </span>
-        </Link>
+      <div className="flex items-center justify-around px-1 pt-1.5 pb-1">
+        {/* 1. SENTINEL AI Starting Page (If permitted) */}
+        {canAI && (
+          <Link
+            href="/"
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
+              isAI
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-current={isAI ? "page" : undefined}
+          >
+            {isAI && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <Sparkles className={`h-5 w-5 mb-0.5 transition-transform ${isAI ? "scale-110 text-emerald-500 dark:text-emerald-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              {t("nav.disasterAssistant", "Sentinel AI")}
+            </span>
+          </Link>
+        )}
 
-        {/* 2. Spatial 3D Map */}
-        <Link
-          href="/map"
-          className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
-            isMap
-              ? "text-gov-blue dark:text-cyan-400 font-bold"
-              : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-          }`}
-          aria-current={isMap ? "page" : undefined}
-        >
-          {isMap && (
-            <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
-          )}
-          <Compass className={`h-5 w-5 mb-0.5 transition-transform ${isMap ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
-          <span className="text-[10px] tracking-tight truncate max-w-[56px]">
-            {t("nav.spatialMap", "3D Map")}
-          </span>
-        </Link>
+        {/* 2. Command Center (If permitted) */}
+        {canCommand && (
+          <Link
+            href="/command-center"
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
+              isCommand
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-current={isCommand ? "page" : undefined}
+          >
+            {isCommand && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <ShieldAlert className={`h-5 w-5 mb-0.5 transition-transform ${isCommand ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              {t("nav.commandCenter", "Command")}
+            </span>
+          </Link>
+        )}
 
-        {/* 3. Community Hazard Intel */}
-        <Link
-          href="/community"
-          className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
-            isCommunity
-              ? "text-gov-blue dark:text-cyan-400 font-bold"
-              : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-          }`}
-          aria-current={isCommunity ? "page" : undefined}
-        >
-          {isCommunity && (
-            <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
-          )}
-          <Users className={`h-5 w-5 mb-0.5 transition-transform ${isCommunity ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
-          <span className="text-[10px] tracking-tight truncate max-w-[56px]">
-            {t("nav.community", "Hazards")}
-          </span>
-        </Link>
+        {/* 3. Spatial 3D Map */}
+        {canMap && (
+          <Link
+            href="/map"
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
+              isMap
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-current={isMap ? "page" : undefined}
+          >
+            {isMap && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <Compass className={`h-5 w-5 mb-0.5 transition-transform ${isMap ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              {t("nav.spatialMap", "3D Map")}
+            </span>
+          </Link>
+        )}
 
-        {/* 4. Operations Command */}
-        <Link
-          href="/operations"
-          className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
-            isOperations
-              ? "text-gov-blue dark:text-cyan-400 font-bold"
-              : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-          }`}
-          aria-current={isOperations ? "page" : undefined}
-        >
-          {isOperations && (
-            <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
-          )}
-          <Activity className={`h-5 w-5 mb-0.5 transition-transform ${isOperations ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
-          <span className="text-[10px] tracking-tight truncate max-w-[56px]">
-            {t("nav.operations", "Operations")}
-          </span>
-        </Link>
+        {/* 4. Community Hazard Intel */}
+        {canCommunity && (
+          <Link
+            href="/community"
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
+              isCommunity
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-current={isCommunity ? "page" : undefined}
+          >
+            {isCommunity && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <Users className={`h-5 w-5 mb-0.5 transition-transform ${isCommunity ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              {t("nav.community", "Hazards")}
+            </span>
+          </Link>
+        )}
 
-        {/* 5. Menu Drawer Trigger */}
+        {/* 5. Operations (for incident commanders/field officers) OR Alerts (for general users) */}
+        {canOperations ? (
+          <Link
+            href="/operations"
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
+              isOperations
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-current={isOperations ? "page" : undefined}
+          >
+            {isOperations && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <Activity className={`h-5 w-5 mb-0.5 transition-transform ${isOperations ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              {t("nav.operations", "Operations")}
+            </span>
+          </Link>
+        ) : canAlerts ? (
+          <Link
+            href="/alerts"
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all relative min-h-[44px] ${
+              isAlerts
+                ? "text-gov-blue dark:text-cyan-400 font-bold"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+            aria-current={isAlerts ? "page" : undefined}
+          >
+            {isAlerts && (
+              <span className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-gov-blue dark:bg-cyan-400" />
+            )}
+            <Bell className={`h-5 w-5 mb-0.5 transition-transform ${isAlerts ? "scale-110 text-gov-blue dark:text-cyan-400" : ""}`} />
+            <span className="text-[10px] tracking-tight truncate max-w-[56px]">
+              {t("nav.alertsDelivery", "Alerts")}
+            </span>
+          </Link>
+        ) : null}
+
+        {/* 6. Menu Drawer Trigger */}
         <button
           type="button"
           onClick={onOpenMenu}
@@ -1641,7 +2084,17 @@ function MobileBottomNav({
 }
 
 /** GIGW-Compliant Government Footer */
-function GovFooter({ t }: { t: (key: string, fallback?: string) => string }) {
+function GovFooter({ t, user }: { t: (key: string, fallback?: string) => string; user?: any }) {
+  const isUserMode = normalizeRole(user?.role) === Role.USER;
+  const quickLinks = isUserMode
+    ? [
+        { label: "Spatial GIS Map", href: "/map" },
+        { label: "Live Weather", href: "/weather" },
+        { label: "Field & Community", href: "/community" },
+        { label: "Alerts & Delivery", href: "/alerts" },
+      ]
+    : FOOTER_QUICK_LINKS;
+
   return (
     <footer className="mt-16 pt-8 border-t-4 border-gov-blue bg-white dark:bg-[#050A14] rounded-2xl p-6 sm:p-8 shadow-xs border border-slate-200 dark:border-slate-800">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-8 text-sm">
@@ -1669,7 +2122,7 @@ function GovFooter({ t }: { t: (key: string, fallback?: string) => string }) {
             Quick Links
           </h3>
           <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
-            {FOOTER_QUICK_LINKS.map((link) => (
+            {quickLinks.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}

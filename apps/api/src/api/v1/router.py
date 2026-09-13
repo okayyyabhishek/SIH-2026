@@ -73,9 +73,11 @@ api_v1_router.include_router(connectivity_router)
 # Active Stage 10 Community Intelligence & Field Sensor Network Endpoints
 from src.api.v1.community import router as community_router
 from src.api.v1.sensors import router as sensors_router
+from src.api.v1.disaster_chat import router as disaster_chat_router
 
 api_v1_router.include_router(community_router)
 api_v1_router.include_router(sensors_router)
+api_v1_router.include_router(disaster_chat_router)
 
 # Stage-Gated Architectural Placeholder for legacy /community-reports/* paths
 @api_v1_router.api_route("/community-reports/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])

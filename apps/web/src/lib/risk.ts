@@ -199,3 +199,70 @@ export async function triggerRiskRun(payload: {
   });
   return res.data;
 }
+
+// ==============================================================================
+// STAGE 5 PRODUCTION REAL-TIME ML INFERENCE & MULTI-MODEL EVALUATION
+// ==============================================================================
+
+export interface SpatialRiskPredictionRequest {
+  latitude: number;
+  longitude: number;
+  model_type?: "rf" | "xgb" | "lr";
+  features?: Record<string, number>;
+}
+
+export interface SpatialRiskPredictionResponse {
+  latitude: number;
+  longitude: number;
+  model_type: string;
+  model_version: string;
+  risk_class: string;
+  risk_probability: number;
+  class_probabilities: Record<string, number>;
+  nearest_station?: string | null;
+  spatial_distance_km?: number | null;
+  state?: string | null;
+  data_temporal_year?: number | null;
+  feature_source: string;
+  input_features: Record<string, number>;
+  explanation?: {
+    model_type?: string;
+    decision_path_summary?: string;
+    baseline_bias?: number;
+    raw_log_odds?: number;
+    top_contributing_features?: Array<
+      | string
+      | {
+          feature_name: string;
+          feature_value?: number;
+          importance?: number;
+          coefficient?: number;
+          impact?: number;
+          direction_of_influence?: string;
+          association_statement?: string;
+        }
+    > | null;
+  } | null;
+  risk_label?: string | null;
+  top_factors?: string[] | null;
+}
+
+export async function predictPointRisk(
+  payload: SpatialRiskPredictionRequest
+): Promise<SpatialRiskPredictionResponse> {
+  const res = await fetchFromAPI<APIEnvelope<SpatialRiskPredictionResponse>>(
+    "api/v1/risk/predict-point",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+  return res.data;
+}
+
+export async function fetchModelEvaluation(): Promise<Record<string, any>> {
+  const res = await fetchFromAPI<APIEnvelope<Record<string, any>>>(
+    "api/v1/risk/evaluation"
+  );
+  return res.data;
+}

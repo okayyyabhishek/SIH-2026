@@ -8,7 +8,11 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class RiskBaseModel(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
 
 
 class RiskLevel(str, Enum):
@@ -150,7 +154,7 @@ class RiskEvidence(BaseModel):
     created_at: datetime
 
 
-class RiskPrediction(BaseModel):
+class RiskPrediction(RiskBaseModel):
     id: str
     subject_type: RiskSubjectType
     subject_id: str
@@ -182,7 +186,7 @@ class RiskPrediction(BaseModel):
     created_at: datetime
 
 
-class ModelVersion(BaseModel):
+class ModelVersion(RiskBaseModel):
     id: str
     model_name: str
     algorithm: str
@@ -207,7 +211,7 @@ class ModelVersion(BaseModel):
     activated_at: Optional[datetime] = None
 
 
-class ModelRun(BaseModel):
+class ModelRun(RiskBaseModel):
     id: str
     model_version_id: str
     initiated_by: str
@@ -225,19 +229,67 @@ class ModelRun(BaseModel):
     correlation_id: str
 
 
-class RiskRunRequest(BaseModel):
+class RiskRunRequest(RiskBaseModel):
     model_version_id: Optional[str] = None
     district_id: Optional[str] = None
     subject_type: Optional[RiskSubjectType] = RiskSubjectType.SLOPE_UNIT
     subject_ids: Optional[List[str]] = None
 
 
-class ModelRegistrationRequest(BaseModel):
+class ModelRegistrationRequest(RiskBaseModel):
     model_name: str
     algorithm: str
     version: str
     feature_definition_version: str = "1.0.0"
     hyperparameters: Dict[str, Any] = Field(default_factory=dict)
     weights: Dict[str, Any]
-    limitations: List[str] = Field(default_factory=list)
     metrics: Optional[Dict[str, Any]] = None
+
+
+class SpatialRiskPredictionRequest(RiskBaseModel):
+    latitude: float = Field(..., ge=-90.0, le=90.0, description="Latitude in EPSG:4326")
+    longitude: float = Field(..., ge=-180.0, le=180.0, description="Longitude in EPSG:4326")
+    model_type: Optional[str] = Field("rf", description="Model architecture: 'rf' (Random Forest), 'xgb' (XGBoost), 'lr' (Logistic Regression)")
+    features: Optional[Dict[str, Any]] = Field(None, description="Optional feature overrides")
+
+
+class GeotechMetrics(RiskBaseModel):
+    depth_to_slip_plane_m: float = Field(6.0, description="Depth of critical shear failure plane in meters")
+    pore_water_pressure_kpa: float = Field(..., description="Subsurface pore water pressure (u) in kPa")
+    effective_cohesion_kpa: float = Field(..., description="Effective soil cohesion (c') in kPa")
+    friction_angle_deg: float = Field(..., description="Effective internal friction angle (phi') in degrees")
+    pore_pressure_ratio_ru: float = Field(..., description="Pore pressure ratio (ru = u / (gamma * z))")
+    factor_of_safety_fs: float = Field(..., description="Deterministic infinite slope Factor of Safety (Fs)")
+    subsurface_creep_um_hr: float = Field(..., description="Subsurface inclinometer displacement velocity in um/hr")
+    stability_classification: str = Field(..., description="'GEOTECHNICALLY_STABLE', 'WATCH_LIMIT_EQUILIBRIUM', or 'CRITICAL_FAILURE_IMMINENT'")
+
+
+class RealTimeSigmoidCalculation(RiskBaseModel):
+    raw_logit_z: float = Field(..., description="Raw linear logit z = beta_0 + sum(w_i * x_i)")
+    sigmoid_probability: float = Field(..., description="Standard real-time Sigmoid evaluation: sigma(z) = 1 / (1 + exp(-z))")
+    sigmoid_formula: str = Field("sigma(z) = 1.0 / (1.0 + exp(-z))", description="Exact mathematical formula string")
+    platt_calibrated_probability: Optional[float] = Field(None, description="Platt-scaled calibrated probability")
+    operating_point: Dict[str, float] = Field(default_factory=dict, description="Active point (z, sigma)")
+    curve_points: Optional[List[Dict[str, float]]] = Field(None, description="Coordinates along continuous S-curve for visualization")
+
+
+class SpatialRiskPredictionResponse(RiskBaseModel):
+    latitude: float = Field(..., description="Latitude of prediction")
+    longitude: float = Field(..., description="Longitude of prediction")
+    model_type: str = Field(..., description="Model architecture type ('rf', 'xgb', 'lr')")
+    model_version: str = Field(..., description="Model version tag")
+    risk_class: str = Field(..., description="Hazard risk category: Low, Moderate, High, Very High")
+    risk_probability: float = Field(..., description="Calibrated risk probability [0.0, 1.0]")
+    class_probabilities: Dict[str, float] = Field(default_factory=dict, description="Multi-class probabilities")
+    nearest_station: Optional[str] = Field(None, description="Nearest geospatial observation station")
+    spatial_distance_km: Optional[float] = Field(None, description="Distance to nearest observation in km")
+    state: Optional[str] = Field(None, description="Identified NER state")
+    data_temporal_year: Optional[int] = Field(2026, description="Data observation year")
+    feature_source: str = Field(..., description="Observation provenance description")
+    input_features: Dict[str, Any] = Field(default_factory=dict, description="Resolved feature values")
+    explanation: Optional[Dict[str, Any]] = Field(None, description="Transparent feature attribution and ranking")
+    risk_label: Optional[str] = Field(None, description="Alias for risk_class")
+    top_factors: Optional[List[str]] = Field(None, description="Top factor names for quick consumption")
+    geotech_metrics: Optional[GeotechMetrics] = Field(None, description="Real-time physical subsurface geotechnical properties")
+    sigmoid_calculation: Optional[RealTimeSigmoidCalculation] = Field(None, description="Transparent real-time Sigmoid function evaluation")
+

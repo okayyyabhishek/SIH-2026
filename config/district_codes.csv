@@ -1,0 +1,88 @@
+district_code,state_code,district_name,state_name,hq_name,census_code
+101,1,Papum Pare,Arunachal Pradesh,Yupia,247
+102,1,West Kameng,Arunachal Pradesh,Bomdila,245
+103,1,Tawang,Arunachal Pradesh,Tawang,244
+104,1,East Kameng,Arunachal Pradesh,Seppa,246
+105,1,Lower Subansiri,Arunachal Pradesh,Ziro,248
+106,1,Upper Subansiri,Arunachal Pradesh,Daporijo,249
+107,1,West Siang,Arunachal Pradesh,Aalo,250
+108,1,East Siang,Arunachal Pradesh,Pasighat,251
+109,1,Upper Siang,Arunachal Pradesh,Yingkiong,252
+110,1,Dibang Valley,Arunachal Pradesh,Anini,253
+111,1,Lower Dibang Valley,Arunachal Pradesh,Roing,254
+112,1,Lohit,Arunachal Pradesh,Tezu,255
+113,1,Anjaw,Arunachal Pradesh,Hawai,256
+114,1,Changlang,Arunachal Pradesh,Changlang,257
+115,1,Tirap,Arunachal Pradesh,Khonsa,258
+116,1,Longding,Arunachal Pradesh,Longding,259
+201,2,Dima Hasao,Assam,Haflong,315
+202,2,Kamrup Metropolitan,Assam,Guwahati,321
+203,2,Cachar,Assam,Silchar,316
+204,2,Karbi Anglong,Assam,Diphu,309
+205,2,Hailakandi,Assam,Hailakandi,318
+206,2,Karimganj,Assam,Karimganj,317
+207,2,Dibrugarh,Assam,Dibrugarh,304
+208,2,Tinsukia,Assam,Tinsukia,305
+209,2,Jorhat,Assam,Jorhat,311
+210,2,Golaghat,Assam,Golaghat,312
+211,2,Sivasagar,Assam,Sivasagar,306
+212,2,Sonitpur,Assam,Tezpur,307
+213,2,Lakhimpur,Assam,North Lakhimpur,308
+214,2,Dhemaji,Assam,Dhemaji,303
+215,2,Barpeta,Assam,Barpeta,324
+301,3,Imphal West,Manipur,Lamphelpat,278
+302,3,Noney,Manipur,Longmai,280
+303,3,Churachandpur,Manipur,Churachandpur,281
+304,3,Imphal East,Manipur,Porompat,279
+305,3,Tamenglong,Manipur,Tamenglong,277
+306,3,Senapati,Manipur,Senapati,276
+307,3,Ukhrul,Manipur,Ukhrul,275
+308,3,Kangpokpi,Manipur,Kangpokpi,274
+309,3,Bishnupur,Manipur,Bishnupur,282
+310,3,Thoubal,Manipur,Thoubal,283
+311,3,Chandel,Manipur,Chandel,284
+401,4,East Khasi Hills,Meghalaya,Shillong,298
+402,4,West Jaintia Hills,Meghalaya,Jowai,299
+403,4,East Jaintia Hills,Meghalaya,Khliehriat,300
+404,4,West Khasi Hills,Meghalaya,Nongstoin,297
+405,4,South West Khasi Hills,Meghalaya,Mawkyrwat,296
+406,4,Ri Bhoi,Meghalaya,Nongpoh,295
+407,4,East Garo Hills,Meghalaya,Williamnagar,294
+408,4,West Garo Hills,Meghalaya,Tura,293
+409,4,South Garo Hills,Meghalaya,Baghmara,292
+501,5,Aizawl,Mizoram,Aizawl,283
+502,5,Champhai,Mizoram,Champhai,285
+503,5,Kolasib,Mizoram,Kolasib,282
+504,5,Lunglei,Mizoram,Lunglei,286
+505,5,Mamit,Mizoram,Mamit,281
+506,5,Serchhip,Mizoram,Serchhip,284
+507,5,Lawngtlai,Mizoram,Lawngtlai,287
+508,5,Siaha,Mizoram,Siaha,288
+509,5,Hnahthial,Mizoram,Hnahthial,289
+510,5,Khawzawl,Mizoram,Khawzawl,290
+511,5,Saitual,Mizoram,Saitual,291
+601,6,Kohima,Nagaland,Kohima,261
+602,6,Dimapur,Nagaland,Dimapur,265
+603,6,Mokokchung,Nagaland,Mokokchung,262
+604,6,Wokha,Nagaland,Wokha,266
+605,6,Zunheboto,Nagaland,Zunheboto,267
+606,6,Phek,Nagaland,Phek,268
+607,6,Tuensang,Nagaland,Tuensang,263
+608,6,Mon,Nagaland,Mon,264
+609,6,Peren,Nagaland,Peren,269
+610,6,Kiphire,Nagaland,Kiphire,270
+611,6,Longleng,Nagaland,Longleng,271
+701,7,Gangtok,Sikkim,Gangtok,241
+702,7,Namchi,Sikkim,Namchi,243
+703,7,Mangan,Sikkim,Mangan,240
+704,7,Gyalshing,Sikkim,Gyalshing,242
+705,7,Pakyong,Sikkim,Pakyong,239
+706,7,Soreng,Sikkim,Soreng,238
+801,8,West Tripura,Tripura,Agartala,289
+802,8,Sepahijala,Tripura,Bishramganj,290
+803,8,Khowai,Tripura,Khowai,291
+804,8,Gomati,Tripura,Udaipur,292
+805,8,South Tripura,Tripura,Belonia,293
+806,8,North Tripura,Tripura,Dharmanagar,294
+807,8,Unakoti,Tripura,Kailashahar,295
+808,8,Dhalai,Tripura,Ambassa,296

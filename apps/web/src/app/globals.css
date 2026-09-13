@@ -43,6 +43,31 @@ html, body {
 }
 
 /* ==========================================================================
+   ACCESSIBILITY: ROOT TEXT SIZE SCALING (GIGW 3.0 Standard)
+   Scales all rem-based typography and arbitrary font classes across the platform
+   ========================================================================== */
+
+html[data-text-size="sm"] {
+  font-size: 87.5% !important;
+}
+
+html[data-text-size="base"] {
+  font-size: 100% !important;
+}
+
+html[data-text-size="lg"] {
+  font-size: 115% !important;
+}
+
+html[data-text-size="sm"] [class*="text-["] {
+  font-size: 0.875em !important;
+}
+
+html[data-text-size="lg"] [class*="text-["] {
+  font-size: 1.15em !important;
+}
+
+/* ==========================================================================
    ACCESSIBILITY (GIGW 3.0 & WCAG 2.2 LEVEL AA)
    ========================================================================== */
 
@@ -263,32 +288,62 @@ html.light input.bg-sentinel-900 {
 }
 
 /* Light Mode Typography Harmonization: Ensure text-white on light surfaces adapts to dark slate unless on colored buttons or in the dark navbar */
-html.light main h1.text-white,
-html.light main h2.text-white,
-html.light main h3.text-white,
-html.light main h4.text-white,
+html.light main h1.text-white:not(.sentinel-preserve-white):not(.sentinel-dark-banner *),
+html.light main h2.text-white:not(.sentinel-preserve-white):not(.sentinel-dark-banner *),
+html.light main h3.text-white:not(.sentinel-preserve-white):not(.sentinel-dark-banner *),
+html.light main h4.text-white:not(.sentinel-preserve-white):not(.sentinel-dark-banner *),
 html.light .gov-card h1.text-white,
 html.light .gov-card h2.text-white,
 html.light .gov-card h3.text-white,
-html.light [class*="bg-sentinel"] .text-white:not(button):not([class*="bg-emerald"]):not([class*="bg-red"]):not([class*="bg-amber"]):not([class*="bg-blue"]):not([class*="bg-cyan"]):not([class*="bg-indigo"]) {
+html.light [class*="bg-sentinel"] .text-white:not(button):not([class*="bg-emerald"]):not([class*="bg-red"]):not([class*="bg-amber"]):not([class*="bg-blue"]):not([class*="bg-cyan"]):not([class*="bg-indigo"]):not(.sentinel-preserve-white):not(.sentinel-dark-banner *):not([class*="from-slate-950"] *) {
   color: #0F172A !important;
 }
 
-html.light [class*="bg-sentinel"] .text-slate-200,
+/* Preserve crisp white & light typography in dark command headers and banners even in light mode */
+html.light .sentinel-dark-banner,
+html.light .sentinel-dark-banner h1,
+html.light .sentinel-dark-banner h2,
+html.light .sentinel-dark-banner h3,
+html.light .sentinel-dark-banner h4,
+html.light .sentinel-dark-banner .text-white,
+html.light .sentinel-dark-banner [class*="text-white"],
+html.light [class*="from-slate-950"] h1,
+html.light [class*="from-slate-950"] h2,
+html.light [class*="from-slate-950"] h3,
+html.light [class*="from-slate-950"] .text-white,
+html.light [class*="from-slate-900"] .text-white,
+html.light [class*="bg-slate-950"] .text-white,
+.sentinel-preserve-white {
+  color: #FFFFFF !important;
+}
+
+html.light .sentinel-dark-banner p.text-slate-300,
+html.light .sentinel-dark-banner .text-slate-300,
+html.light [class*="from-slate-950"] p.text-slate-300,
+html.light [class*="from-slate-900"] p.text-slate-300 {
+  color: #CBD5E1 !important;
+}
+
+html.light .sentinel-dark-banner .text-slate-200,
+html.light [class*="from-slate-950"] .text-slate-200 {
+  color: #E2E8F0 !important;
+}
+
+html.light [class*="bg-sentinel"]:not(.sentinel-dark-banner):not([class*="from-slate-950"]) .text-slate-200,
 html.light [class*="bg-white"] .text-slate-200,
 html.light [class*="bg-slate-50"] .text-slate-200,
 html.light .liquid-panel .text-slate-200 {
   color: #1E293B !important;
 }
 
-html.light [class*="bg-sentinel"] .text-slate-300,
+html.light [class*="bg-sentinel"]:not(.sentinel-dark-banner):not([class*="from-slate-950"]) .text-slate-300,
 html.light [class*="bg-white"] .text-slate-300,
 html.light [class*="bg-slate-50"] .text-slate-300,
 html.light .liquid-panel .text-slate-300 {
   color: #334155 !important;
 }
 
-html.light [class*="bg-sentinel"] .text-slate-400,
+html.light [class*="bg-sentinel"]:not(.sentinel-dark-banner):not([class*="from-slate-950"]) .text-slate-400,
 html.light [class*="bg-white"] .text-slate-400,
 html.light [class*="bg-slate-50"] .text-slate-400,
 html.light .liquid-panel .text-slate-400 {

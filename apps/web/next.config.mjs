@@ -11,10 +11,11 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   async rewrites() {
+    const apiDestination = process.env.INTERNAL_API_URL || "http://127.0.0.1:8000";
     return [
       {
         source: "/api/v1/:path*",
-        destination: "http://127.0.0.1:8000/api/v1/:path*",
+        destination: `${apiDestination}/api/v1/:path*`,
       },
     ];
   },

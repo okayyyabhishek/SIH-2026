@@ -46,7 +46,17 @@ export default function GeotechPage() {
       />
 
       {/* Geotechnical Engineering Reference Context */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-200 dark:border-sentinel-900 text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-slate-200 dark:border-sentinel-900 text-xs">
+        <div className="p-4 rounded-xl bg-white dark:bg-sentinel-900/50 border border-slate-200 dark:border-sentinel-800/80 space-y-2 shadow-xs">
+          <div className="flex items-center space-x-2 text-emerald-800 dark:text-emerald-300 font-bold">
+            <Activity className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Real-Time Sigmoid σ(z)</span>
+          </div>
+          <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+            <strong className="text-emerald-700 dark:text-emerald-400 font-mono">σ(z) = 1 / (1 + e^-z)</strong> converts the physical logit <code className="font-mono text-[11px] text-slate-800 dark:text-slate-200">z = β₀ + Σ wᵢxᵢ</code> into failure probability. Directly coupled with 2026 NER landslide triggers.
+          </p>
+        </div>
+
         <div className="p-4 rounded-xl bg-white dark:bg-sentinel-900/50 border border-slate-200 dark:border-sentinel-800/80 space-y-2 shadow-xs">
           <div className="flex items-center space-x-2 text-amber-800 dark:text-amber-300 font-bold">
             <Activity className="h-4 w-4" />

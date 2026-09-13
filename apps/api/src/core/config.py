@@ -107,6 +107,9 @@ class Settings(BaseSettings):
     ISRO_BHUVAN_ENABLED: bool = False
     BHASHINI_ENABLED: bool = False
 
+    # AI Reasoning & Google Gemini AI Studio
+    GEMINI_API_KEY: str | None = Field(default=None, description="Google Gemini AI Studio API Key")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

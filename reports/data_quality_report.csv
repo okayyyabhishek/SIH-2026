@@ -1,0 +1,54 @@
+feature_name,missing_count,missing_percentage,minimum,maximum,mean,median,std,invalid_count,source,observation_year,2026_status
+sample_id,0,0.0,,,,,,0,Survey of India State & District Boundaries,2024,STATIC_BASELINE
+grid_id,0,0.0,,,,,,0,Survey of India State & District Boundaries,2024,STATIC_BASELINE
+date,0,0.0,,,,,,0,IMD Daily Gridded Rainfall,2026,NRT_2026
+year,0,0.0,2026.0,2026.0,2026.0,2026.0,0.0,0,IMD Daily Gridded Rainfall,2026,NRT_2026
+month,0,0.0,9.0,9.0,9.0,9.0,0.0,0,IMD Daily Gridded Rainfall,2026,NRT_2026
+state_code,0,0.0,1.0,8.0,4.539,5.0,2.298,0,Survey of India State & District Boundaries,2024,STATIC_BASELINE
+district_code,0,0.0,101.0,808.0,459.897,501.0,228.292,0,Survey of India State & District Boundaries,2024,STATIC_BASELINE
+latitude,0,0.0,22.021,28.875,25.557,25.659,1.628,0,Survey of India State & District Boundaries,2024,STATIC_BASELINE
+longitude,0,0.0,88.119,95.189,92.097,92.514,1.9,0,Survey of India State & District Boundaries,2024,STATIC_BASELINE
+elevation_m,0,0.0,9.0,6597.0,1087.185,599.0,1390.589,0,NASA SRTM GL1 30m Global DEM,2000,STATIC_BASELINE
+slope_deg,0,0.0,5.42,41.95,28.111,30.36,8.808,0,NASA SRTM GL1 30m Global DEM,2000,STATIC_BASELINE
+aspect_deg,0,0.0,8.9,357.3,156.441,151.7,109.409,0,NASA SRTM GL1 30m Global DEM,2000,STATIC_BASELINE
+terrain_ruggedness,0,0.0,12.87,71.32,49.178,52.78,14.093,0,NASA SRTM GL1 30m Global DEM,2000,STATIC_BASELINE
+relief_m,0,0.0,67.3,352.2,244.265,261.8,68.704,0,NASA SRTM GL1 30m Global DEM,2000,STATIC_BASELINE
+rainfall_1d_mm,0,0.0,0.0,46.3,12.182,11.3,8.274,0,IMD Daily Gridded Rainfall,2026,NRT_2026
+rainfall_3d_mm,0,0.0,0.0,145.0,34.554,29.8,23.604,0,IMD Daily Gridded Rainfall,2026,NRT_2026
+rainfall_7d_mm,0,0.0,9.6,271.7,84.008,79.4,40.85,0,IMD Daily Gridded Rainfall,2026,NRT_2026
+rainfall_30d_mm,0,0.0,73.6,791.0,316.115,310.4,108.379,0,IMD Daily Gridded Rainfall,2026,NRT_2026
+rainfall_90d_mm,0,0.0,180.4,2755.3,1163.996,1120.0,392.421,0,IMD Daily Gridded Rainfall,2026,NRT_2026
+temperature_mean_c,0,0.0,-9.4,29.5,23.03,24.8,6.813,0,ERA5-Land / IMD Surface Network,2026,NRT_2026
+temperature_max_c,0,0.0,-6.0,33.1,27.124,29.4,6.888,0,ERA5-Land / IMD Surface Network,2026,NRT_2026
+temperature_min_c,0,0.0,-13.7,27.1,20.283,22.2,6.92,0,ERA5-Land / IMD Surface Network,2026,NRT_2026
+temperature_range_c,0,0.0,2.9,10.0,6.841,6.9,0.997,0,ERA5-Land / IMD Surface Network,2026,NRT_2026
+humidity_pct,0,0.0,77.0,98.0,89.967,91.0,3.408,0,ERA5-Land / IMD Surface Network,2025,LATEST_AVAILABLE_NOT_2026
+ndvi,0,0.0,0.622,0.879,0.833,0.846,0.047,0,Sentinel-2 Derived Multispectral Indices,2026,DERIVED_2026
+evi,0,0.0,0.424,0.787,0.69,0.704,0.067,0,Sentinel-2 Derived Multispectral Indices,2026,DERIVED_2026
+ndwi,0,0.0,-0.793,-0.53,-0.75,-0.764,0.049,0,Sentinel-2 Derived Multispectral Indices,2026,DERIVED_2026
+nbr,0,0.0,0.39,0.703,0.659,0.674,0.058,0,Sentinel-2 Derived Multispectral Indices,2026,DERIVED_2026
+vegetation_fraction,0,0.0,0.512,1.0,0.95,0.99,0.099,0,Sentinel-2 Derived Multispectral Indices,2026,DERIVED_2026
+soil_ph,0,0.0,4.45,6.35,5.163,4.93,0.614,0,ISRIC SoilGrids 250m Global Grids,2020,STATIC_BASELINE
+soil_organic_carbon,0,0.0,20.0,45.9,33.131,34.0,6.153,0,ISRIC SoilGrids 250m Global Grids,2020,STATIC_BASELINE
+soil_clay_pct,0,0.0,20.5,39.5,32.117,34.6,6.385,0,ISRIC SoilGrids 250m Global Grids,2020,STATIC_BASELINE
+soil_sand_pct,0,0.0,25.0,49.0,33.915,32.3,8.422,0,ISRIC SoilGrids 250m Global Grids,2020,STATIC_BASELINE
+soil_silt_pct,0,0.0,29.5,36.5,33.968,34.3,2.275,0,ISRIC SoilGrids 250m Global Grids,2020,STATIC_BASELINE
+soil_bulk_density,0,0.0,110.0,137.0,125.561,124.9,6.729,0,ISRIC SoilGrids 250m Global Grids,2020,STATIC_BASELINE
+soil_water_capacity,0,0.0,0.14,0.2,0.172,0.17,0.016,0,ISRIC SoilGrids 250m Global Grids,2020,STATIC_BASELINE
+landcover_code,0,0.0,1.0,7.0,1.458,1.0,1.384,0,ESA WorldCover 10m Global Land Cover,2021,LATEST_AVAILABLE_NOT_2026
+distance_to_river_m,0,0.0,1756.7,85000.0,44981.48,40038.2,23407.713,0,HydroSHEDS River Network,2000,STATIC_BASELINE
+distance_to_water_m,0,0.0,1493.2,72250.0,38234.258,34032.5,19896.556,0,JRC Global Surface Water Occurrence,2021,LATEST_AVAILABLE_NOT_2026
+water_occurrence_pct,0,0.0,0.0,56.1,0.29,0.0,3.665,0,JRC Global Surface Water Occurrence,2021,LATEST_AVAILABLE_NOT_2026
+drainage_density,0,0.0,2.8,4.2,3.327,2.8,0.68,0,HydroSHEDS River Network,2000,STATIC_BASELINE
+forest_cover_pct,0,0.0,36.1,84.5,68.744,74.3,15.455,0,MoEFCC Protected Area Network / FSI,2023,LATEST_AVAILABLE_NOT_2026
+protected_area_flag,0,0.0,0.0,1.0,0.037,0.0,0.189,0,MoEFCC Protected Area Network of India,2023,LATEST_AVAILABLE_NOT_2026
+distance_to_protected_area_m,0,0.0,2386.2,249056.5,96798.183,100620.3,52415.872,0,MoEFCC Protected Area Network of India,2023,LATEST_AVAILABLE_NOT_2026
+flood_history_flag,0,0.0,0.0,0.0,0.0,0.0,0.0,0,Sentinel NER System,2026,DERIVED_2026
+landslide_history_flag,0,0.0,0.0,1.0,0.089,0.0,0.285,0,Sentinel NER System,2026,DERIVED_2026
+nearest_landslide_distance_km,0,0.0,0.63,89.76,22.62,19.48,15.383,0,NASA Global Landslide Catalog / GSI Bhukosh,2026,OBSERVED_2026
+distance_to_road_m,0,0.0,2206.3,132663.6,44342.263,39051.5,28936.341,0,MoRTH & OpenStreetMap NER National Highway Network,2024,STATIC_BASELINE
+road_proximity_flag,0,0.0,0.0,0.0,0.0,0.0,0.0,0,MoRTH & OpenStreetMap NER National Highway Network,2024,STATIC_BASELINE
+road_cut_slope_hazard,0,0.0,0.0,0.0,0.0,0.0,0.0,0,MoRTH & OpenStreetMap NER National Highway Network,2026,DERIVED_2026
+target_flood_risk,0,0.0,0.0,1.0,0.107,0.0,0.31,0,GSI Bhukosh / CWC Flood Records,2026,OBSERVED_2026
+target_landslide_risk,0,0.0,0.0,3.0,1.31,1.0,0.923,0,GSI Bhukosh Verified Landslide Database,2026,OBSERVED_2026
+data_quality_score,0,0.0,1.0,1.0,1.0,1.0,0.0,0,Sentinel NER System,2026,DERIVED_2026
